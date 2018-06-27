@@ -77,7 +77,7 @@ class MSELoss(_PairwiseImageLoss):
          \mathcal{S}_{\text{MSE}} := \frac{1}{\vert \mathcal{X} \vert}\sum_{x\in\mathcal{X}}
           \Big(I_M\big(x+f(x)\big) - I_F\big(x\big)\Big)^2
 
-     fixed_image: Fixed image
+     
     :parameter: fixed_image: Fixed image
 
     """

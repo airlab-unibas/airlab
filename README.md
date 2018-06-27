@@ -10,6 +10,7 @@ We refer to our arXiv preprint [2018](https://arxiv.org/abs/1806.09907) for a de
 
 Authors: Robin Sandkuehler and Christoph Jud
 
+[Documentation](https://airlab.readthedocs.io/en/latest/index.html)
 
 ## Getting Started
 1. Clone git repository: `git clone https://github.com/airlab-unibas/airlab.git`
@@ -52,7 +53,7 @@ AirLab is licensed under the Apache 2.0 license. For details, consider the LICEN
 
 If you can use this software in any way, please cite us in your publications:
 
-[2018] Robin Sandkuehler,  Christoph Jud, and Philippe C. Cattin. "AirLab: Autograd Image Registration Laboratory". arXiv preprint arXiv:1006.4990, 85 2018. [link](https://arxiv.org/abs/1806.09907)
+[2018] Robin Sandkuehler,  Christoph Jud, and Philippe C. Cattin. "AirLab: Autograd Image Registration Laboratory". arXiv preprint arXiv:1806.09907, 2018. [link](https://arxiv.org/abs/1806.09907)
 
 
 ### Contributing
