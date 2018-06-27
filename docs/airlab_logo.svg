@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="237.56535mm"
+   height="72.718239mm"
+   viewBox="0 0 237.56535 72.718239"
+   version="1.1"
+   id="svg1226"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="airlab_logo.svg"
+   inkscape:export-filename="/home/sandkuehler/Projects/Airlab/documentation/airlab_log.png"
+   inkscape:export-xdpi="193.47501"
+   inkscape:export-ydpi="193.47501">
+  <defs
+     id="defs1220" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="491.05249"
+     inkscape:cy="199.25493"
+     inkscape:document-units="mm"
+     inkscape:current-layer="g948"
+     showgrid="true"
+     inkscape:window-width="2560"
+     inkscape:window-height="1311"
+     inkscape:window-x="0"
+     inkscape:window-y="55"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid830" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata1223">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(24.169269,-79.43214)">
+    <g
+       id="g948">
+      <rect
+         inkscape:export-ydpi="193.47501"
+         inkscape:export-xdpi="193.47501"
+         y="157.44205"
+         x="-26.815098"
+         height="84.666679"
+         width="230.1875"
+         id="rect1821"
+         style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.17083503;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+      <g
+         id="g1598"
+         transform="translate(1.1616905,17.296811)">
+        <text
+           xml:space="preserve"
+           style="font-style:normal;font-weight:normal;font-size:15.88567066px;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#999999;fill-opacity:1;stroke:none;stroke-width:1.32380509px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+           x="-12.788882"
+           y="131.77963"
+           id="text4270-2-7-3-3-0"><tspan
+             sodipodi:role="line"
+             id="tspan4272-7-2-9-6-9"
+             x="-12.788882"
+             y="131.77963"
+             style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:10.72002602px;line-height:1.25;font-family:'Exo 2';-inkscape-font-specification:'Exo 2 Bold';fill:#999999;fill-opacity:1;stroke-width:1.32380509px">Autograd Image Registration Laboratory</tspan></text>
+        <g
+           transform="translate(-10.583337,-13.229163)"
+           id="g935">
+          <path
+             id="path501-9-97"
+             transform="matrix(0.26458333,0,0,0.26458333,-24.169269,79.43214)"
+             d="m 636,-7.1601562 c -14.0795,0 -37.04814,87.8825912 -44.08789,103.0449222 -1.86747,4.022179 -6.80435,11.918794 -12.82227,21.474614 a 7.3857642,95.967828 68.882371 0 1 16.51954,-7.89258 c 0.32965,-0.63158 0.63647,-1.23747 0.89257,-1.78907 6.79794,-14.64147 20.39242,-73.207027 33.98828,-73.207027 9.397,0 18.73833,27.838009 25.89063,49.953125 A 7.3857642,95.967828 68.882371 0 1 673.7168,78.001953 C 663.73123,47.472613 647.1116,-7.1601562 636,-7.1601562 Z m 42.31055,98.6152342 a 7.3857642,95.967828 68.882371 0 1 -17.33399,6.962891 c 1.29925,3.815861 2.48642,7.068291 3.50391,9.259761 6.79793,14.64148 40.78817,58.56748 33.99023,73.20899 -6.79793,14.64151 -54.3846,0 -67.98047,0 -13.59586,0 -61.18058,14.64151 -67.97851,0 -4.99202,-10.75196 11.97613,-37.23502 24.05469,-56.37695 a 7.3857642,95.967828 68.882371 0 1 -14.29493,3.70703 c -15.91656,25.47588 -34.58022,56.97129 -30.07812,66.66797 7.03975,15.16229 79.72714,-4.04102 93.80664,-4.04102 14.0795,0 86.76689,19.20331 93.80664,4.04102 7.03971,-15.1623 -42.67904,-83.83767 -49.71875,-99.000004 -0.50638,-1.090658 -1.11535,-2.646278 -1.77734,-4.429688 z"
+             style="fill:#cb3a39;fill-opacity:1;stroke-width:0.41452542"
+             inkscape:connector-curvature="0" />
+          <flowRoot
+             transform="matrix(1.3981178,0,0,1.3981178,-160.2711,-217.69422)"
+             style="font-style:normal;font-weight:normal;line-height:0.01%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             id="flowRoot4136-7-7-7-2-7-3"
+             xml:space="preserve"><flowRegion
+               id="flowRegion4138-2-5-8-4-5-6"><rect
+                 y="208.07649"
+                 x="112.14286"
+                 height="246.42857"
+                 width="497.14285"
+                 id="rect4140-6-3-63-4-3-0" /></flowRegion><flowPara
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:42.89496994px;line-height:1.25;font-family:'Exo 2';-inkscape-font-specification:'Exo 2, '"
+               id="flowPara4142-4-5-7-4-5-6">AIRL   <flowSpan
+   id="flowSpan897"
+   style="font-size:8.0743475px"> </flowSpan><flowSpan
+   id="flowSpan832"
+   style="font-size:3.28020358px">          </flowSpan>B</flowPara></flowRoot>        </g>
+      </g>
+    </g>
+  </g>
+</svg>

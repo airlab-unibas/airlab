@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="62.928108mm"
+   height="55.665913mm"
+   viewBox="0 0 62.928108 55.665913"
+   version="1.1"
+   id="svg845"
+   inkscape:version="0.92.3 (2405546, 2018-03-11)"
+   sodipodi:docname="airlab_logo_symbol.svg">
+  <defs
+     id="defs839" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.9899495"
+     inkscape:cx="-229.89258"
+     inkscape:cy="146.12444"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="2560"
+     inkscape:window-height="1311"
+     inkscape:window-x="0"
+     inkscape:window-y="55"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata842">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-53.958566,-99.077759)">
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.2;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect1459"
+       width="66.951019"
+       height="58.93293"
+       x="52.755852"
+       y="98.216164"
+       inkscape:export-xdpi="193.47501"
+       inkscape:export-ydpi="193.47501" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:#cb3a39;fill-opacity:1;stroke-width:0.10967652"
+       d="m 85.422619,99.077759 c -3.725201,0 -9.80232,23.252271 -11.664921,27.263971 -0.494101,1.0642 -1.800317,3.15351 -3.392559,5.68182 a 1.9541501,25.391488 68.882371 0 1 4.370795,-2.08824 c 0.08722,-0.16711 0.1684,-0.32742 0.236159,-0.47336 1.798622,-3.87389 5.395495,-19.36936 8.992733,-19.36936 2.486289,0 4.95785,7.36547 6.850229,13.21676 a 1.9541501,25.391488 68.882371 0 1 4.586801,-1.69912 C 92.759841,113.53268 88.362563,99.077759 85.422619,99.077759 Z m 11.194667,26.091951 a 1.9541501,25.391488 68.882371 0 1 -4.586285,1.84226 c 0.34376,1.00962 0.657865,1.87015 0.927076,2.44998 1.798619,3.87389 10.791873,15.49598 8.993243,19.36988 -1.79861,3.8739 -14.389253,0 -17.986494,0 -3.597238,0 -16.187362,3.8739 -17.985981,0 -1.320805,-2.84479 3.168684,-9.85177 6.36447,-14.9164 a 1.9541501,25.391488 68.882371 0 1 -3.7822,0.98082 c -4.211257,6.74049 -9.14935,15.07365 -7.95817,17.63923 1.862601,4.01169 21.094473,-1.06919 24.819674,-1.06919 3.725201,0 22.957071,5.08088 24.819671,1.06919 1.86259,-4.01169 -11.29216,-22.18205 -13.15475,-26.19375 -0.13398,-0.28857 -0.295103,-0.70016 -0.470254,-1.17202 z"
+       id="path501-9-97-3" />
+  </g>
+</svg>
