@@ -1,0 +1,28 @@
+Autograd Image Registraion Laboratory
+Copyright 2018 University of Basel
+
+This software is distributed unter the
+Apache 2.0 License.
+
+See LICENSE file for details.
+
+----------------------------------------------------
+
+The software contains code and links to libraries from third parties
+that have different copyrights.
+
+They are:
+
+1)  PyTorch:        Copyright by Facebook, Inc
+		    Distributed under the BSD license.
+
+2)  NumPy:          Copyright by NumPy Developers
+                    Distributed under the BSD license.
+
+3)  SimpleITK:      Copyright by Insight Segmentation and Registration Toolkit
+                    Distributed under the Apache 2.0 license.
+
+4)  MatplotLib      Copyright by Matplotlib Development Team
+		    Distributed under the License agreement for matplotlib
+		    version 1.3.0 and later
+
