@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 __version__ = '0.1'
 url = 'https://github.com/airlab-unibas/airlab'
 
-install_requires = ['SimpleITK', 'torch, numpy', 'matplotlib']
+install_requires = ['SimpleITK', 'torch', 'numpy', 'matplotlib']
 
 
 setup(
