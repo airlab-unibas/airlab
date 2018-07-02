@@ -79,6 +79,9 @@ class MSELoss(_PairwiseImageLoss):
 
     Args:
         fixed_image (Image): Fixed image for the registration
+        moving_image (Image): Moving image for the registration
+        size_average (bool): Average loss function
+        reduce (bool): Reduce loss function to a single value
 
     """
     def __init__(self, fixed_image, moving_image, size_average=True, reduce=True):
