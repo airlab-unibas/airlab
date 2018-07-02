@@ -77,8 +77,8 @@ class MSELoss(_PairwiseImageLoss):
          \mathcal{S}_{\text{MSE}} := \frac{1}{\vert \mathcal{X} \vert}\sum_{x\in\mathcal{X}}
           \Big(I_M\big(x+f(x)\big) - I_F\big(x\big)\Big)^2
 
-     
-    :parameter: fixed_image: Fixed image
+    Args:
+        fixed_image (Image): Fixed image for the registration
 
     """
     def __init__(self, fixed_image, moving_image, size_average=True, reduce=True):
