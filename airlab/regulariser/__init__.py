@@ -12,14 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .demonsRegulariser import GaussianRegulariser, GraphDiffusionRegulariser, EdgeUpdaterIntensities,\
-                               EdgeUpdaterDisplacementIntensities
+from . import parameter
+from . import demons
+from . import displacement
 
-from .displacementRegulariser import SparsityRegulariser, TVRegulariser, IsotropicTVRegulariser, DiffusionRegulariser
-from .parameterRegulariser import SparsityRegulariser, TVRegulariser, IsotropicTVRegulariser, DiffusionRegulariser
-
-
-__all__ = ['GaussianRegulariser', 'GraphDiffusionRegulariser', 'EdgeUpdaterIntensities',\
-           'EdgeUpdaterDisplacementIntensities', 'SparsityRegulariser', 'TVRegulariser', 'IsotropicTVRegulariser',\
-           'DiffusionRegulariser', 'SparsityRegulariser', 'TVRegulariser', 'IsotropicTVRegulariser',\
-           'DiffusionRegulariser']

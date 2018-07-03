@@ -12,12 +12,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .pairwiseTransformation import RigidTransformation, NonParametricTransformation, BsplineTransformation,\
-                                     WendlandKernelTransformation
-
-from .utils import compute_grid, upsample_displacement, warp_image, displacement_to_unit_displacement,\
-                                 unit_displacement_to_dispalcement, rotation_matrix
-
-__all__ = ['RigidTransformation', 'NonParametricTransformation', 'BsplineTransformation', \
-           'WendlandKernelTransformation', 'compute_grid', 'upsample_displacement', 'warp_image', \
-           'displacement_to_unit_displacement', 'unit_displacement_to_dispalcement', 'rotation_matrix']
+from . import pairwise
+from . import utils

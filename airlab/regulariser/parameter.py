@@ -91,9 +91,9 @@ class IsotropicTVRegulariser(_SpatialParameterRegulariser):
     def _regulariser_3d(self, parameters):
         for name, parameter in parameters:
             if self._parameter_name in name:
-                dx = (parameter[1:, 1:, 1:, :] - parameter[:-1, 1:, 1:, :]).pow(2)*self._scaling[0]
-                dy = (parameter[1:, 1:, 1:, :] - parameter[1:, :-1, 1:, :]).pow(2)*self._scaling[1]
-                dz = (parameter[1:, 1:, 1:, :] - parameter[1:, 1:, :-1, :]).pow(2)*self._scaling[2]
+                dx = (parameter[:, 1:, 1:, 1:] - parameter[:, -1, 1:, 1:]).pow(2)*self._scaling[0]
+                dy = (parameter[:, 1:, 1:, 1:] - parameter[:, 1:, :-1, 1:]).pow(2)*self._scaling[1]
+                dz = (parameter[:, 1:, 1:, 1:] - parameter[:, 1:, 1:, :-1]).pow(2)*self._scaling[2]
 
                 return th.sqrt(dx + dy + dz + 1e-7)
 

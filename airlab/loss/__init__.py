@@ -11,6 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .pairwiseImageLoss import MSELoss, NCCLoss, LCCLoss
 
-__all__ = ['MSELoss', 'NCCLoss', 'LCCLoss']
+from airlab.loss import pairwise
+

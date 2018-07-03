@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from .utils import *
-from .transformation import *
-from .loss import *
+import airlab.transformation
+import airlab.loss
 from .registration import *
-from .regulariser import *
+import airlab.regulariser

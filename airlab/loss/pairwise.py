@@ -23,9 +23,6 @@ from ..utils import kernelFunction as utils
 
 
 
-
-
-
 # Loss base class (standard from PyTorch)
 class _PairwiseImageLoss(th.nn.modules.Module):
     def __init__(self, fixed_image, moving_image, size_average=True, reduce=True):
@@ -47,7 +44,7 @@ class _PairwiseImageLoss(th.nn.modules.Module):
         assert self._moving_image.device == self._fixed_image.device
         assert len(self._moving_image.size) == 2 or len(self._moving_image.size) == 3
 
-        self._grid = T.compute_grid(self._moving_image.size, dtype=self._moving_image.dtype,
+        self._grid = T.utils.compute_grid(self._moving_image.size, dtype=self._moving_image.dtype,
                                      device=self._moving_image.device)
 
         self._dtype = self._moving_image.dtype
@@ -69,7 +66,7 @@ class _PairwiseImageLoss(th.nn.modules.Module):
             return tensor*self._weight
 
 
-class MSELoss(_PairwiseImageLoss):
+class MSE(_PairwiseImageLoss):
     r""" The mean square error loss is a simple and fast to compute point-wise measure
     which is well suited for monomodal image registration.
 
@@ -85,7 +82,7 @@ class MSELoss(_PairwiseImageLoss):
 
     """
     def __init__(self, fixed_image, moving_image, size_average=True, reduce=True):
-        super(MSELoss, self).__init__(fixed_image, moving_image, size_average, reduce)
+        super(MSE, self).__init__(fixed_image, moving_image, size_average, reduce)
 
         self.name = "mse"
 
@@ -110,12 +107,23 @@ class MSELoss(_PairwiseImageLoss):
         return self.return_loss(value)
 
 
-"""
-    Normalized Cross Correlation image loss
-"""
-class NCCLoss(_PairwiseImageLoss):
+class NCC(_PairwiseImageLoss):
+    r""" The normalized cross correlation loss is a measure for image pairs with a linear
+         intensity relation
+
+        .. math::
+                   \mathcal{S}_{\text{NCC}} := \frac{\sum I_F\cdot (I_M\circ f)
+                   - \sum\text{E}(I_F)\text{E}(I_M\circ f)}
+                   {\vert\mathcal{X}\vert\cdot\sum\text{Var}(I_F)\text{Var}(I_M\circ f)}
+
+
+        Args:
+            fixed_image (Image): Fixed image for the registration
+            moving_image (Image): Moving image for the registration
+
+        """
     def __init__(self, fixed_image, moving_image):
-        super(NCCLoss, self).__init__(fixed_image, moving_image, False, False)
+        super(NCC, self).__init__(fixed_image, moving_image, False, False)
 
         self.name = "ncc"
 
@@ -146,9 +154,9 @@ class NCCLoss(_PairwiseImageLoss):
 """
     Local Normaliced Cross Corelation Image Loss
 """
-class LCCLoss(_PairwiseImageLoss):
+class LCC(_PairwiseImageLoss):
     def __init__(self, fixed_image, moving_image, sigma=3, kernel_type="box", size_average=True, reduce=True):
-        super(LCCLoss, self).__init__(fixed_image, moving_image, size_average, reduce)
+        super(LCC, self).__init__(fixed_image, moving_image, size_average, reduce)
 
         self.name = "lcc"
         self.warped_moving_image = th.empty_like(self._moving_image.image, dtype=self._dtype, device=self._device)

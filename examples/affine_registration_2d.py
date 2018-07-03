@@ -26,10 +26,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import airlab as al
 
 
-
 def main():
     start = time.time()
-
 
     # set the used data type
     dtype = th.float32
@@ -53,12 +51,12 @@ def main():
     registration = al.PairwiseRegistration(dtype=dtype, device=device)
 
     # choose the affine transformation model
-    transformation = al.RigidTransformation(moving_image.size, dtype=dtype, device=device)
+    transformation = al.transformation.pairwise.RigidTransformation(moving_image.size, dtype=dtype, device=device)
 
     registration.set_transformation(transformation)
 
     # choose the Mean Squared Error as image loss
-    image_loss = al.MSELoss(fixed_image, moving_image)
+    image_loss = al.loss.pairwise.MSE(fixed_image, moving_image)
 
     registration.set_image_loss([image_loss])
 
@@ -73,7 +71,7 @@ def main():
 
     # warp the moving image with the final transformation result
     displacement = transformation.get_displacement()
-    warped_image = al.warp_image(moving_image, displacement)
+    warped_image = al.transformation.utils.warp_image(moving_image, displacement)
 
     end = time.time()
 
@@ -98,9 +96,10 @@ def main():
 
     plt.show()
 
-    sitk.WriteImage(warped_image.itk(), '/tmp/rigid_warped_image.vtk')
-    sitk.WriteImage(moving_image.itk(), '/tmp/rigid_moving_image.vtk')
-    sitk.WriteImage(fixed_image.itk(), '/tmp/rigid_fixed_image.vtk')
+    # write result images
+    #sitk.WriteImage(warped_image.itk(), '/tmp/rigid_warped_image.vtk')
+    #sitk.WriteImage(moving_image.itk(), '/tmp/rigid_moving_image.vtk')
+    #sitk.WriteImage(fixed_image.itk(), '/tmp/rigid_fixed_image.vtk')
 
 
 

@@ -73,7 +73,6 @@ class Displacement(Image):
         return self.image.cpu().numpy()
 
 
-
 """
     Convert an image to tensor representation
 """

@@ -44,17 +44,17 @@ def main():
     registration = al.DemonsRegistraion(dtype=dtype, device=device)
 
     # choose the affine transformation model
-    transformation = al.NonParametricTransformation(moving_image.size, dtype=dtype, device=device)
+    transformation = al.transformation.pairwise.NonParametricTransformation(moving_image.size, dtype=dtype, device=device)
 
     registration.set_transformation(transformation)
 
     # choose the Mean Squared Error as image loss
-    image_loss = al.MSELoss(fixed_image, moving_image)
+    image_loss = al.loss.pairwise.MSE(fixed_image, moving_image)
 
     registration.set_image_loss([image_loss])
 
     # choose a regulariser for the demons
-    regulariser = al.GaussianRegulariser(moving_image.spacing, sigma=[2, 2], dtype=dtype, device=device)
+    regulariser = al.regulariser.demons.GaussianRegulariser(moving_image.spacing, sigma=[2, 2], dtype=dtype, device=device)
 
     registration.set_regulariser([regulariser])
 
@@ -71,7 +71,7 @@ def main():
     displacement = transformation.get_displacement()
 
     # use the shaded version of the fixed image for visualization
-    warped_image = al.warp_image(shaded_image, displacement)
+    warped_image = al.transformation.utils.warp_image(shaded_image, displacement)
 
     end = time.time()
 

@@ -127,7 +127,9 @@ def unit_displacement_to_dispalcement(displacement, pixel_spacing):
         displacement[..., dim] = float(displacement.shape[-dim - 2] - 1) * displacement[..., dim] / 2.0
     return displacement
 
-
+"""
+    Create a 3d rotation matrix
+"""
 def rotation_matrix(phi_x, phi_y, phi_z, dtype=th.float32, device='cpu'):
     R_x = th.Tensor([[1, 0, 0], [0, th.cos(phi_x), -th.sin(phi_x)], [0, th.sin(phi_x), th.cos(phi_x)]])
     R_y = th.Tensor([[th.cos(phi_y), 0, th.sin(phi_y)], [0, 1, 0], [-th.sin(phi_y), 0, th.cos(phi_y)]])

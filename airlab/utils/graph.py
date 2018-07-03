@@ -17,7 +17,6 @@ import numpy as np
 from . import matrix as mat
 
 
-
 class Graph():
     def __init__(self, graph_size, dtype=th.float32, device='cpu'):
 
