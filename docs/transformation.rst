@@ -5,7 +5,7 @@ transformation
 Pairwise Transformation
 ----------------------------------------
 
-.. automodule:: airlab.transformation.pairwiseTransformation
+.. automodule:: airlab.transformation.pairwise
     :members:
     :undoc-members:
 

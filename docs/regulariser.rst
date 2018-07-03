@@ -7,23 +7,23 @@ Demons Regulariser
 
 
 
-.. autoclass:: airlab.regulariser.demonsRegulariser.GaussianRegulariser
+.. autoclass:: airlab.regulariser.demons.GaussianRegulariser
    :members:
    :undoc-members:
 
 
 Graph Diffusion Regulariser
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-.. autoclass:: airlab.regulariser.demonsRegulariser.GraphDiffusionRegulariser
+.. autoclass:: airlab.regulariser.demons.GraphDiffusionRegulariser
    :members:
    :undoc-members:
 
 
-.. autoclass:: airlab.regulariser.demonsRegulariser.EdgeUpdaterDisplacementIntensities
+.. autoclass:: airlab.regulariser.demons.EdgeUpdaterDisplacementIntensities
    :members:
    :undoc-members:
 
-.. autoclass:: airlab.regulariser.demonsRegulariser.EdgeUpdaterIntensities
+.. autoclass:: airlab.regulariser.demons.EdgeUpdaterIntensities
    :members:
    :undoc-members:
 
@@ -31,13 +31,13 @@ Graph Diffusion Regulariser
 Displacement Regulariser 
 ------------------------------------
 
-.. automodule:: airlab.regulariser.displacementRegulariser
+.. automodule:: airlab.regulariser.displacement
     :members:
     :undoc-members:
 
 Parameter Regulariser 
 ---------------------------------
 
-.. automodule:: airlab.regulariser.parameterRegulariser
+.. automodule:: airlab.regulariser.parameter
     :members:
     :undoc-members:
