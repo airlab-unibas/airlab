@@ -1,7 +1,7 @@
 loss
 ====
 
-Pairwise Transformation
+Pairwise Loss
 ----------------------------------------
 
 .. automodule:: airlab.loss.pairwise
