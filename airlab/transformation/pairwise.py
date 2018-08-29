@@ -88,17 +88,21 @@ class RigidTransformation(_Transformation):
 
     def _compute_displacement_2d(self):
 
-        matrix = th.zeros(2, 3, dtype=self._dtype, device=self._device)
-        matrix[0, 0] = th.cos(self.trans_parameters[0])
-        matrix[0, 1] = -th.sin(self.trans_parameters[0])
-        matrix[1, 0] = -matrix[0, 1]
-        matrix[1, 1] = th.cos(self.trans_parameters[0])
+        trans_matrix = th.diag(th.ones(3, dtype=self._dtype, device=self._device))
+        trans_matrix[0, 2] = self.trans_parameters[1]
+        trans_matrix[1, 2] = self.trans_parameters[2]
 
-        matrix[0, 2] = self.trans_parameters[1]
-        matrix[1, 2] = self.trans_parameters[2]
+        rot_scale_matrix = th.zeros(3, 3, dtype=self._dtype, device=self._device)
+        rot_scale_matrix[0, 0] = th.cos(self.trans_parameters[0])
+        rot_scale_matrix[0, 1] = -th.sin(self.trans_parameters[0])
+        rot_scale_matrix[1, 0] = -rot_scale_matrix[0, 1]
+        rot_scale_matrix[1, 1] = th.cos(self.trans_parameters[0])
+        rot_scale_matrix[2, 2] = 1
+
+        matrix = th.mm(trans_matrix, rot_scale_matrix)[0:2, :]
 
         return th.mm(self._grid.view(np.prod(self._image_size).tolist(), self._dim + 1), matrix.t()) \
-                .view(*(self._image_size.tolist()), self._dim) - self._grid[:,:,:2]
+                .view(*(self._image_size.tolist()), self._dim) - self._grid[:, :, :2]
 
     def _compute_displacement_3d(self):
         rot_matrix = tu.rotation_matrix(self.trans_parameters[0], self.trans_parameters[1],
@@ -157,7 +161,7 @@ class NonParametricTransformation(_Transformation):
 
 
     def _compute_displacement_2d(self):
-        return self.trans_parameters.transpose(0, 2)
+        return self.trans_parameters.transpose(0, 2).transpose(0, 1)
 
     def _compute_displacement_3d(self):
         return self.trans_parameters.transpose(0, 3).transpose(0, 2).transpose(0, 1)
@@ -232,7 +236,7 @@ class _KernelTransformation(_Transformation):
         self._crop_start = self._crop_start.astype(dtype=int)
         self._crop_end = self._crop_end.astype(dtype=int)
 
-        size = [1,1] + new_image_size.astype(dtype=int).tolist()
+        size = [1, 1] + new_image_size.astype(dtype=int).tolist()
         self._displacement_tmp = th.empty(*size, dtype=self._dtype, device=self._device)
 
         size = [1, 1] + self._image_size.astype(dtype=int).tolist()
@@ -246,7 +250,7 @@ class _KernelTransformation(_Transformation):
         # crop displacement
         return th.squeeze(displacement_tmp[:, :,
                        self._stride[0] + self._crop_start[0]:-self._stride[0] - self._crop_end[0],
-                       self._stride[1] + self._crop_start[1]:-self._stride[1] - self._crop_end[1]].transpose_(1, 3))
+                       self._stride[1] + self._crop_start[1]:-self._stride[1] - self._crop_end[1]].transpose_(1, 3).transpose(1, 2))
 
 
     def _compute_displacement_3d(self):

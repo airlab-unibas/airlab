@@ -14,6 +14,8 @@ Authors: Robin Sandkuehler and Christoph Jud
 
 [Documentation](https://airlab.readthedocs.io/en/latest/index.html)
 
+Follow us on Twitter [<img width="2%" src="docs/twitter.png">](https://twitter.com/AirLab6?ref_src=twsrc%5Etfw) to get informed about the most recent features, achievements and bugfixes.
+
 ## Getting Started
 1. Clone git repository: `git clone https://github.com/airlab-unibas/airlab.git`
 2. Make sure that following python libraries are installed:
