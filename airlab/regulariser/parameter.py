@@ -83,8 +83,8 @@ class IsotropicTVRegulariser(_SpatialParameterRegulariser):
     def _regulariser_2d(self, parameters):
         for name, parameter in parameters:
             if self._parameter_name in name:
-                dx = (parameter[:, 1:, 1:] - parameter[:, -1, 1:]).pow(2)*self._scaling[0]
-                dy = (parameter[:, 1:, 1:] - parameter[:, 1:, :-1]).pow(2)*self._scaling[1]
+                dx = (parameter[:, 1:, 1:] - parameter[:, :-1, 1:]).pow(2)*self._scaling[0]
+                dy = (parameter[:, 1:, 1:] - parameter[:,  1:, :-1]).pow(2)*self._scaling[1]
 
                 return th.sqrt(dx + dy + 1e-7)
 
@@ -117,8 +117,8 @@ class TVRegulariser(_SpatialParameterRegulariser):
     def _regulariser_2d(self, parameters):
         for name, parameter in parameters:
             if self._parameter_name in name:
-                dx = th.abs(parameter[:, 1:, 1:] - parameter[:, -1, 1:])*self._pixel_spacing[0]
-                dy = th.abs(parameter[:, 1:, 1:] - parameter[:, 1:, :-1])*self._pixel_spacing[1]
+                dx = th.abs(parameter[:, 1:, 1:] - parameter[:, :-1, 1:])*self._pixel_spacing[0]
+                dy = th.abs(parameter[:, 1:, 1:] - parameter[:,  1:, :-1])*self._pixel_spacing[1]
 
                 return dx + dy
 
@@ -151,8 +151,8 @@ class DiffusionRegulariser(_SpatialParameterRegulariser):
     def _regulariser_2d(self, parameters):
         for name, parameter in parameters:
             if self._parameter_name in name:
-                dx = (parameter[:, 1:, 1:] - parameter[:, -1, 1:]).pow(2) * self._pixel_spacing[0]
-                dy = (parameter[:, 1:, 1:] - parameter[:, 1:, :-1]).pow(2) * self._pixel_spacing[1]
+                dx = (parameter[:, 1:, 1:] - parameter[:, :-1, 1:]).pow(2) * self._pixel_spacing[0]
+                dy = (parameter[:, 1:, 1:] - parameter[:,  1:, :-1]).pow(2) * self._pixel_spacing[1]
 
                 return dx + dy
 
