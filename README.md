@@ -41,7 +41,7 @@ The project depends on following libraries:
 
 
 ## History
-The project started in the [Center for medical Image Analysis & Navigation](http://dbe.unibas.ch/public/dbe/research/ImagingandComputationalMedicine/cian.html) research group of the [University of Basel](http://www.unibas.ch). 
+The project started in the [Center for medical Image Analysis & Navigation](https://dbe.unibas.ch/en/research/imaging-modelling-diagnosis/center-for-medical-image-analysis-navigation/) research group of the [University of Basel](http://www.unibas.ch). 
 
 
 ##### Authors and Contributors
