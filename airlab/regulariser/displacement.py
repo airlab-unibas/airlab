@@ -143,7 +143,7 @@ class DiffusionRegulariser(_Regulariser):
 """
 class SparsityRegulariser(_Regulariser):
     def __init__(self, size_average=True, reduce=True):
-        super(SparsityRegulariser, self).__init__(0, size_average, reduce)
+        super(SparsityRegulariser, self).__init__([0], size_average, reduce)
 
     def forward(self, displacement):
         return self.return_loss(th.abs(displacement))
