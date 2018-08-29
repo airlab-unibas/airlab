@@ -79,7 +79,7 @@ class _ImageSeriesRegistration(_Registration):
         self._fixed_image = None
 
     def SetImageSeries(self, images):
-        self._images = image
+        self._images = images
 
     def SetFixedImage(self, image):
         self._fixed_image = image

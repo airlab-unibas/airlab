@@ -198,7 +198,7 @@ class _KernelTransformation(_Transformation):
 
     def _initialize(self):
 
-        cp_grid = np.ceil(np.divide(self._image_size, self._stride))
+        cp_grid = np.ceil(np.divide(self._image_size, self._stride)).astype(dtype=int)
 
         # new image size after convolution
         inner_image_size = np.multiply(self._stride, cp_grid) - (self._stride - 1)
@@ -282,7 +282,7 @@ class BsplineTransformation(_KernelTransformation):
         self._padding = (np.array(self._kernel.size()) - 1) / 2
 
         self._kernel.unsqueeze_(0).unsqueeze_(0)
-        self._kernel = self._kernel.expand(self._dim, *((np.ones(self._dim + 1)*-1).tolist()))
+        self._kernel = self._kernel.expand(self._dim, *((np.ones(self._dim + 1, dtype=int)*-1).tolist()))
         self._kernel = self._kernel.to(dtype=dtype, device=self._device)
 
         self._initialize()

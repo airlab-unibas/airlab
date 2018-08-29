@@ -51,7 +51,7 @@ class GaussianRegulariser(_DemonsRegulariser):
         self._padding = self._padding.astype(dtype=int).tolist()
 
         self._kernel.unsqueeze_(0).unsqueeze_(0)
-        self._kernel = self._kernel.expand(self._dim, *((np.ones(self._dim + 1) * -1).tolist()))
+        self._kernel = self._kernel.expand(self._dim, *((np.ones(self._dim + 1, dtype=int) * -1).tolist()))
         self._kernel = self._kernel.to(dtype=dtype, device=self._device)
 
         if self._dim == 2:

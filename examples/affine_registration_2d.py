@@ -36,7 +36,7 @@ def main():
 
     # In order to use a GPU uncomment the following line. The number is the device index of the used GPU
     # Here, the GPU with the index 0 is used.
-    #device = th.device("cuda:0")
+    # device = th.device("cuda:0")
 
     # load the image data and normalize to [0, 1]
     itkImg = sitk.ReadImage("./data/affine_test_image_2d_fixed.png", sitk.sitkFloat32)

@@ -109,10 +109,10 @@ class MSE(_PairwiseImageLoss):
 
 class NCC(_PairwiseImageLoss):
     r""" The normalized cross correlation loss is a measure for image pairs with a linear
-         intensity relation
+         intensity relation.
 
         .. math::
-                   \mathcal{S}_{\text{NCC}} := \frac{\sum I_F\cdot (I_M\circ f)
+            \mathcal{S}_{\text{NCC}} := \frac{\sum I_F\cdot (I_M\circ f)
                    - \sum\text{E}(I_F)\text{E}(I_M\circ f)}
                    {\vert\mathcal{X}\vert\cdot\sum\text{Var}(I_F)\text{Var}(I_M\circ f)}
 
@@ -121,7 +121,7 @@ class NCC(_PairwiseImageLoss):
             fixed_image (Image): Fixed image for the registration
             moving_image (Image): Moving image for the registration
 
-        """
+    """
     def __init__(self, fixed_image, moving_image):
         super(NCC, self).__init__(fixed_image, moving_image, False, False)
 
