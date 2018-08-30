@@ -96,7 +96,7 @@ def main():
 
     plt.subplot(224)
     plt.imshow(displacement.magnitude().numpy(), cmap='jet')
-    plt.title('Magnitude Displacemente')
+    plt.title('Magnitude Displacement')
 
     plt.show()
 
