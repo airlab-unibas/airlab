@@ -146,7 +146,7 @@ def create_image_pyramide(image, down_sample_factor):
             sigma = (th.tensor(level)/2).to(dtype=th.float32)
 
             kernel = kernelFunction.gaussian_kernel_2d(sigma.numpy(), asTensor=True)
-            padding = [(x - 1)/2 for x in kernel.size()]
+            padding = np.array([(x - 1)/2 for x in kernel.size()], dtype=int).tolist()
             kernel.unsqueeze_(0).unsqueeze_(0)
             kernel = kernel.to(dtype=image.dtype, device=image.device)
 
@@ -161,7 +161,7 @@ def create_image_pyramide(image, down_sample_factor):
             sigma = (th.tensor(level)/2).to(dtype=th.float32)
 
             kernel = kernelFunction.gaussian_kernel_3d(sigma.numpy(), asTensor=True)
-            padding = [(x - 1)/2 for x in kernel.size()]
+            padding = np.array([(x - 1) / 2 for x in kernel.size()], dtype=int).tolist()
             kernel.unsqueeze_(0).unsqueeze_(0)
             kernel = kernel.to(dtype=image.dtype, device=image.device)
 

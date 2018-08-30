@@ -78,7 +78,7 @@ def upsample_displacement(displacement, new_size, interpolation="linear"):
         else:
             interpolation = 'nearest'
 
-    upsampled_displacement = F.upsample(displacement[...,0], size=new_size, mode=interpolation, align_corners=True)
+    upsampled_displacement = F.interpolate(displacement[...,0], size=new_size, mode=interpolation, align_corners=False)
 
     if dim == 2:
         upsampled_displacement = th.transpose(upsampled_displacement.unsqueeze_(-1), 1, -1)
