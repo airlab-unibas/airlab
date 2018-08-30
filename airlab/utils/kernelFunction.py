@@ -118,38 +118,55 @@ Create a 1d Wendland kernel matrix
 """
 def wendland_kernel_1d(sigma, type="C4", asTensor=False, dtype=th.float32, device='cpu'):
 
-    kernel_size = sigma*2 + 1
+	kernel_size = sigma*2 + 1
 
-    x = np.linspace(-(kernel_size - 1) / 2, (kernel_size - 1) / 2, num=kernel_size)
+	x = np.linspace(-(kernel_size - 1) / 2, (kernel_size - 1) / 2, num=kernel_size)
 
-    r = np.sqrt((x/float(sigma))**2)
-    f = np.maximum(1 - r, 0)
+	r = np.sqrt((x/float(sigma))**2)
+	f = np.maximum(1 - r, 0)
 
-    kernel = ((f**6.0)*(3.0 + 18.0*r + 35.0*(r**2)))*(560.0/1680.0)
+	#kernel = ((f**6.0)*(3.0 + 18.0*r + 35.0*(r**2)))*(560.0/1680.0)
+	if type=='C2':
+		kernel = ((f**3.0)*(1.0 + 3.0*r))*5./4.
+	elif type=='C4':
+		kernel = ((f**5.0)*(1.0 + 5.0*r + 8.0*(r**2)/3.))*3./2.
+	elif type=='C6':
+		kernel = ((f**7.0)*(1.0 + 7.0*r + 19.0*(r**2) + 21*(r**3)))*55./32.
+	else:
+		raise ValueError(type)
 
-    if asTensor:
-        return th.tensor(kernel, dtype=dtype, device=device)
-    else:
-        return kernel
+
+	if asTensor:
+		return th.tensor(kernel, dtype=dtype, device=device)
+	else:
+		return kernel
 
 """
 Create a 2d Wendland kernel matrix
 """
 def wendland_kernel_2d(sigma, type="C4", asTensor=False, dtype=th.float32, device='cpu'):
 
-    kernel_size = np.array(sigma)*2 + 1
+	kernel_size = np.array(sigma)*2 + 1
 
-    xv, yv = _compute_mesh_grid_2d(kernel_size)
+	xv, yv = _compute_mesh_grid_2d(kernel_size)
 
-    r = np.sqrt((xv/sigma[0])**2 + (yv/sigma[1])**2)
-    f = np.maximum(1 - r, 0)
+	r = np.sqrt((xv/sigma[0])**2 + (yv/sigma[1])**2)
+	f = np.maximum(1 - r, 0)
 
-    kernel = ((f**6.0)*(3.0 + 18.0*r + 35.0*(r**2)))*(560.0/1680.0)
+	if type=='C2':
+		kernel = ((f**4.0)*(1.0 + 4.0*r))*7./np.pi
+	elif type=='C4':
+		kernel = ((f**6.0)*(1.0 + 6.0*r + 35.0*(r**2)/3.))*9./np.pi
+	elif type=='C6':
+		kernel = ((f**8.0)*(1.0 + 8.0*r + 25.0*(r**2) + 32*(r**3)))*78./(7.*np.pi)
+	else:
+		raise ValueError(type)
+		
 
-    if asTensor:
-        return th.tensor(kernel, dtype=dtype, device=device)
-    else:
-        return kernel
+	if asTensor:
+		return th.tensor(kernel, dtype=dtype, device=device)
+	else:
+		return kernel
 
 
 """
@@ -157,25 +174,33 @@ Create a 3d Wendland kernel matrix
 """
 def wendland_kernel_3d(sigma, type="C4", asTensor=False, dtype=th.float32, device='cpu'):
 
-    kernel_size = np.array(sigma)*2 + 1
+	kernel_size = np.array(sigma)*2 + 1
 
-    x_grid, y_grid, z_grid = _compute_mesh_grid_3d(kernel_size)
+	x_grid, y_grid, z_grid = _compute_mesh_grid_3d(kernel_size)
 
-    r = np.sqrt((x_grid/sigma[0])**2 + (y_grid/sigma[1])**2 + (z_grid/sigma[2])**2)
-    f = np.maximum(1 - r, 0)
+	r = np.sqrt((x_grid/sigma[0])**2 + (y_grid/sigma[1])**2 + (z_grid/sigma[2])**2)
+	f = np.maximum(1 - r, 0)
 
-    kernel = ((f**6.0)*(3.0 + 18.0*r + 35.0*(r**2)))*(560.0/1680.0)
+	#kernel = ((f**6.0)*(3.0 + 18.0*r + 35.0*(r**2)))*(560.0/1680.0)
+	if type=='C2':
+		kernel = ((f**4.0)*(1.0 + 4.0*r))*21./(2.*np.pi)
+	elif type=='C4':
+		kernel = ((f**6.0)*(1.0 + 6.0*r + 35.0*(r**2)/3.))*495./(32.*np.pi)
+	elif type=='C6':
+		kernel = ((f**8.0)*(1.0 + 8.0*r + 25.0*(r**2) + 32*(r**3)))*1365./(64.*np.pi)
+	else:
+		raise ValueError(type)
 
-    if asTensor:
-        return th.tensor(kernel, dtype=dtype, device=device)
-    else:
-        return kernel
+	if asTensor:
+		return th.tensor(kernel, dtype=dtype, device=device)
+	else:
+		return kernel
 
 
 """
     Create a Wendland kernel matrix
 """
-def wendland_kernel(sigma, order=2, dim=1, type="C4", asTensor=False, dtype=th.float32, device='cpu'):
+def wendland_kernel(sigma, dim=1, type="C4", asTensor=False, dtype=th.float32, device='cpu'):
 
     assert dim > 0 and dim <=3
 

@@ -14,7 +14,7 @@
 
 import torch as th
 import numpy as np
-from . import matrix as mat
+from .matrix import MatrixDiagonalElement, LaplaceMatrix
 
 
 class Graph():
@@ -62,12 +62,12 @@ class Graph():
                     self._edge_index_D2[2].append(x + y*self._graph_size[0])
 
 
-        element_1 = mat.MatrixDiagonalElement(np.asarray(self._edge_index_D1), np.ones(len(self._edge_index_D1[0])),
+        element_1 = MatrixDiagonalElement(np.asarray(self._edge_index_D1), np.ones(len(self._edge_index_D1[0])),
                                                  th.tensor(1, dtype=th.int64), dtype=self.dtype, device=self.device)
-        element_2 = mat.MatrixDiagonalElement(np.asarray(self._edge_index_D2), np.ones(len(self._edge_index_D2[0])),
+        element_2 = MatrixDiagonalElement(np.asarray(self._edge_index_D2), np.ones(len(self._edge_index_D2[0])),
                                                  th.tensor(self._graph_size[0], dtype=th.int64), dtype=self.dtype, device=self.device)
 
-        self.laplace_matrix = mat.LaplaceMatrix(self._number_of_nodes, [element_1, element_2], dtype=self.dtype,
+        self.laplace_matrix = LaplaceMatrix(self._number_of_nodes, [element_1, element_2], dtype=self.dtype,
                                                 device=self.device)
 
 
@@ -108,15 +108,15 @@ class Graph():
         #                 self._edge_index_D3[2].append(z + 1)
         #                 self._edge_index_D3[3].append(x + y * self._graph_size[0] + z * self._graph_size[0] * self._graph_size[1])
         #
-        # element_1 = mat.MatrixDiagonalElement(np.asarray(self._edge_index_D1), np.ones(len(self._edge_index_D1[0])),
+        # element_1 = MatrixDiagonalElement(np.asarray(self._edge_index_D1), np.ones(len(self._edge_index_D1[0])),
         #                                       th.tensor(1, dtype=th.int64), dtype=self.dtype, device=self.device)
         #
-        # element_2 = mat.MatrixDiagonalElement(np.asarray(self._edge_index_D2), np.ones(len(self._edge_index_D2[0])),
+        # element_2 = MatrixDiagonalElement(np.asarray(self._edge_index_D2), np.ones(len(self._edge_index_D2[0])),
         #                                       th.tensor(self._graph_size[0], dtype=th.int64), dtype=self.dtype,
         #                                       device=self.device)
         #
-        # element_3 = mat.MatrixDiagonalElement(np.asarray(self._edge_index_D3), np.ones(len(self._edge_index_D3[0])),
+        # element_3 = MatrixDiagonalElement(np.asarray(self._edge_index_D3), np.ones(len(self._edge_index_D3[0])),
         #                                       th.tensor(self._graph_size[0]*self._graph_size[1], dtype=th.int64), dtype=self.dtype,
         #                                       device=self.device)
         #
-        # self.laplace_matrix = mat.LaplaceMatrix(self._number_of_nodes, [element_1, element_2, element_3])
+        # self.laplace_matrix = LaplaceMatrix(self._number_of_nodes, [element_1, element_2, element_3])
