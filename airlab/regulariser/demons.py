@@ -297,7 +297,7 @@ class GraphDiffusionRegulariser(_DemonsRegulariser):
     def get_edge_image(self):
         main_diag_laplace = th.reshape(self._graph.laplace_matrix.main_diag, self._image_size)
 
-        return iu.Image(main_diag_laplace.unsqueeze_(0).unsqueeze(0), self._image_size, self._pixel_spacing)
+        return iu.Image(main_diag_laplace.unsqueeze_(0).unsqueeze(0), self._image_size, self._pixel_spacing, th.zeros(len(self._image_size))) # only zero origin supported yet
 
 
 

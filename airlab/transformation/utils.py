@@ -101,7 +101,7 @@ def warp_image(image, displacement):
     # warp image
     warped_image = F.grid_sample(image.image, displacement + grid)
 
-    return iutils.Image(warped_image, image_size, image.spacing)
+    return iutils.Image(warped_image, image_size, image.spacing, image.origin)
 
 
 """

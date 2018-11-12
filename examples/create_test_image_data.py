@@ -59,8 +59,8 @@ def create_C_2_O_test_images(image_size, dtype=th.float32, device='cpu'):
     moving_image[index] = 1
 
 
-    return [al.image_from_numpy(fixed_image, [1, 1], dtype=dtype, device=device),
-            al.image_from_numpy(moving_image, [1, 1], dtype=dtype, device=device),
-            al.image_from_numpy(shaded_image, [1, 1], dtype=dtype, device=device)]
+    return [al.image_from_numpy(fixed_image, [1, 1], [0, 0], dtype=dtype, device=device),
+            al.image_from_numpy(moving_image, [1, 1], [0, 0], dtype=dtype, device=device),
+            al.image_from_numpy(shaded_image, [1, 1], [0, 0], dtype=dtype, device=device)]
 
 

@@ -52,8 +52,8 @@ class Image:
     Object representing a displacement image
 """
 class Displacement(Image):
-    def __init__(self, tensor_image, image_size, image_spacing):
-        super(Displacement, self).__init__(tensor_image, image_size, image_spacing)
+    def __init__(self, tensor_image, image_size, image_spacing, image_origin):
+        super(Displacement, self).__init__(tensor_image, image_size, image_spacing, image_origin)
 
     def itk(self):
         if len(self.size) == 2:
@@ -63,13 +63,14 @@ class Displacement(Image):
             itk_displacement = sitk.GetImageFromArray(self.image.cpu().numpy())
 
         itk_displacement.SetSpacing(spacing=self.spacing)
+        itk_displacement.SetOrigin(origin=self.origin)
         return itk_displacement
 
     def magnitude(self):
         # tmp = self.image.pow(2)
         # tmp = th.sum(self.image.pow(2), len(self.size))
         return Image(th.sqrt(th.sum(self.image.pow(2),  len(self.size))).unsqueeze(0).unsqueeze(0),
-                     self.size, self.spacing)
+                     self.size, self.spacing, self.origin)
 
     def numpy(self):
         return self.image.cpu().numpy()
@@ -89,24 +90,24 @@ def read_image_as_tensor(filename, dtype=th.float32, device='cpu'):
     Convert an image to tensor representation
 """
 def create_image_from_image(tensor_image, image):
-    return Image(tensor_image, image.size, image.spacing)
+    return Image(tensor_image, image.size, image.spacing, image.origin)
 
 
 
 """
     Convert numpy image to AirlLab image format
 """
-def image_from_numpy(image, pixel_spacing, dtype=th.float32, device='cpu'):
+def image_from_numpy(image, pixel_spacing, image_origin, dtype=th.float32, device='cpu'):
     tensor_image = th.from_numpy(image).unsqueeze_(0).unsqueeze_(0)
     tensor_image = tensor_image.to(dtype=dtype, device=device)
-    return Image(tensor_image, image.shape, pixel_spacing)
+    return Image(tensor_image, image.shape, pixel_spacing, image_origin)
 
 
 """
     Convert an image to tensor representation
 """
 def create_displacement_image_from_image(tensor_displacement, image):
-    return Displacement(tensor_displacement, image.size, image.spacing)
+    return Displacement(tensor_displacement, image.size, image.spacing, image.origin)
 
 
 """
