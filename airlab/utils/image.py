@@ -25,10 +25,11 @@ from . import kernelFunction
     Object representing an image
 """
 class Image:
-    def __init__(self, tensor_image, image_size, image_spacing):
+    def __init__(self, tensor_image, image_size, image_spacing, image_origin):
         self.image = tensor_image
         self.size = image_size
         self.spacing = image_spacing
+        self.origin = image_origin
         self.dtype = self.image.dtype
         self.device = self.image.device
 
@@ -40,6 +41,7 @@ class Image:
     def itk(self):
         itk_image = sitk.GetImageFromArray(self.image.cpu().numpy()[0, 0, ...])
         itk_image.SetSpacing(spacing=self.spacing)
+        itk_image.SetOrigin(origin=self.origin)
         return itk_image
 
     def numpy(self):
@@ -120,6 +122,7 @@ def create_tensor_image_from_itk_image(itk_image, dtype=th.float32, device='cpu'
         itk_image.SetDirection(sitk.VectorDouble([1, 0, 0, 0, 1, 0, 0, 0, 1]))
 
     image_spacing = itk_image.GetSpacing()
+    image_origin = itk_image.GetOrigin()
 
     np_image = np.squeeze(sitk.GetArrayFromImage(itk_image))
     image_size = np_image.shape
@@ -131,7 +134,7 @@ def create_tensor_image_from_itk_image(itk_image, dtype=th.float32, device='cpu'
     tensor_image = th.tensor(np_image, dtype=dtype, device=device).unsqueeze_(0).unsqueeze_(0)
 
 
-    return Image(tensor_image, image_size, image_spacing)
+    return Image(tensor_image, image_size, image_spacing, image_origin)
 
 
 """
@@ -153,7 +156,8 @@ def create_image_pyramide(image, down_sample_factor):
             image_sample = F.conv2d(image.image, kernel, stride=level, padding=padding)
             image_size = image_sample.size()[-image_dim:]
             image_spacing = [x*y for x, y in zip(image.spacing, level)]
-            image_pyramide.append(Image(image_sample, image_size, image_spacing))
+            image_origin = image.origin
+            image_pyramide.append(Image(image_sample, image_size, image_spacing, image_origin))
 
         image_pyramide.append(image)
     elif image_dim == 3:
@@ -168,7 +172,8 @@ def create_image_pyramide(image, down_sample_factor):
             image_sample = F.conv3d(image.image, kernel, stride=level, padding=padding)
             image_size = image_sample.size()[-image_dim:]
             image_spacing = [x*y for x, y in zip(image.spacing, level)]
-            image_pyramide.append(Image(image_sample, image_size, image_spacing))
+            image_origin = image.origin
+            image_pyramide.append(Image(image_sample, image_size, image_spacing, image_origin))
 
         image_pyramide.append(image)
 
