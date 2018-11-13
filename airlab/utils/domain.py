@@ -64,4 +64,7 @@ def CenterOfMass(image):
     # return center of mass
     return cm
 
-
+# TODO: center of mass alignment
+# TODO: calculate intersecting domain
+# TODO: resample both images with same spacing (min of both) using resampleimagefilter of simpleITK
+# TODO: default value is equal to padding
