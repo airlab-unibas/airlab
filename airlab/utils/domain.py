@@ -1,6 +1,7 @@
 
 import numpy as np
-
+import SimpleITK as sitk
+import airlab as al
 
 """
 Create a two dimensional coordinate grid
@@ -10,7 +11,7 @@ def _compute_coordinate_grid_2d(image):
     x = np.linspace(0, image.size[0] - 1, num=image.size[0])
     y = np.linspace(0, image.size[1] - 1, num=image.size[1])
 
-    x_m, y_m = np.meshgrid(y, x)
+    y_m, x_m = np.meshgrid(y, x)
 
     return [x_m, y_m]
 
@@ -23,7 +24,7 @@ def _compute_coordinate_grid_3d(image):
     y = np.linspace(0, image.size[1] - 1, num=image.size[1])
     z = np.linspace(0, image.size[2] - 1, num=image.size[2])
 
-    x_m, y_m, z_m = np.meshgrid(y, x, z)
+    y_m, x_m, z_m = np.meshgrid(y, x, z)
 
     return [x_m, y_m, z_m]
 
@@ -46,7 +47,7 @@ def CenterOfMass(image):
         coordinate_value_array[:, 2] = Y.reshape(num_points)
 
     elif len(image.size)==3:
-        Y, Z, X = _compute_coordinate_grid_3d(image)
+        X, Y, Z = _compute_coordinate_grid_3d(image)
         coordinate_value_array[:, 1] = X.reshape(num_points)
         coordinate_value_array[:, 2] = Y.reshape(num_points)
         coordinate_value_array[:, 3] = Z.reshape(num_points)
@@ -64,7 +65,59 @@ def CenterOfMass(image):
     # return center of mass
     return cm
 
-# TODO: center of mass alignment
-# TODO: calculate intersecting domain
-# TODO: resample both images with same spacing (min of both) using resampleimagefilter of simpleITK
-# TODO: default value is equal to padding
+
+def GetJointDomainImages(fixed_image, moving_image, default_value=0):
+
+    # align images using center of mass
+    moving_image.origin = moving_image.origin - CenterOfMass(moving_image) + CenterOfMass(fixed_image)
+
+    # common origin
+    origin = np.minimum(fixed_image.origin, moving_image.origin)
+
+    # common extent
+    f_extent = np.array(fixed_image.origin) + (np.array(fixed_image.size)-1)*np.array(fixed_image.spacing)
+    m_extent = np.array(moving_image.origin) + (np.array(moving_image.size)-1)*np.array(moving_image.spacing)
+    extent = np.maximum(f_extent, m_extent)
+
+    # common spacing
+    spacing = np.minimum(fixed_image.spacing, moving_image.spacing)
+
+    # common size
+    size = np.ceil((extent-origin)/spacing).astype(int)
+
+    # create new images
+    f_image = al.Image(np.zeros(size), size, spacing, origin)
+    m_image = np.zeros(size)
+
+    # create masks
+    f_mask = np.zeros_like(f_image)
+    m_mask = np.zeros_like(m_image)
+
+    # start and end indizes for masks
+    f_start = (origin - fixed_image.origin)/spacing
+    f_end = size - (extent - f_extent)/spacing
+    m_start = (origin - moving_image.origin) / spacing
+    m_end = size - (extent - m_extent) / spacing
+
+    # fill masks
+
+
+    # resample fixed image
+    resampler = sitk.ResampleImageFilter()
+    resampler.SetSize(size)
+    resampler.SetOutputSpacing(spacing)
+    resampler.SetDefaultPixelValue(default_value)
+
+    # resample fixed image
+    resampler.SetInput(fixed_image.itk())
+    resampler.UpdateLargestPossibleRegion()
+    f_image = al.Image(sitk.GetArrayFromImage(resampler.GetOutput()), size, spacing, origin)
+
+    # resample moving image
+    resampler.SetInput(moving_image.itk())
+    resampler.UpdateLargestPossibleRegion()
+    m_image = al.Image(sitk.GetArrayFromImage(resampler.GetOutput()), size, spacing, origin)
+
+    return f_image, f_mask, m_image, m_mask
+
+

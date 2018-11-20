@@ -25,13 +25,36 @@ from . import kernelFunction
     Object representing an image
 """
 class Image:
+    # Constructor for numpy arrays and pytorch tensors
     def __init__(self, tensor_image, image_size, image_spacing, image_origin):
-        self.image = tensor_image
+
+        # distinguish between numpy array and pytorch tensors
+        if type(tensor_image)==np.ndarray:
+            self.image = th.from_numpy(tensor_image).unsqueeze_(0).unsqueeze_(0)
+        else:
+            self.image = tensor_image
+
         self.size = image_size
         self.spacing = image_spacing
         self.origin = image_origin
         self.dtype = self.image.dtype
         self.device = self.image.device
+        self.ndim = len(self.image.shape)-2
+
+        self._reverse_axis()
+
+    def __init__(self, sitk_image, dtype=th.float32, device='cpu'):
+        if type(sitk_image)==sitk.SimpleITK.Image:
+            self.image = th.from_numpy(sitk.GetArrayFromImage(sitk_image)).unsqueeze_(0).unsqueeze_(0)
+            self.size = sitk_image.GetSize()
+            self.spacing = sitk_image.GetSpacing()
+            self.origin = sitk_image.GetOrigin()
+            self.to(dtype, device)
+            self.ndim = len(self.image.shape) - 2
+
+            self._reverse_axis()
+        else:
+            raise Exception("A SimpleITK image was expected as argument")
 
     def to(self, dtype=th.float32, device='cpu'):
         self.image = self.image.to(dtype=dtype, device=device)
@@ -47,6 +70,10 @@ class Image:
     def numpy(self):
         return self.image.cpu().numpy()[0, 0, ...]
 
+    def _reverse_axis(self):
+        # reverse order of axis to follow the convention of SimpleITK
+        self.image = self.image.squeeze_().permute(tuple(reversed(range(self.ndim))))
+        self.image.unsqueeze_(0).unsqueeze_(0)
 
 """
     Object representing a displacement image
