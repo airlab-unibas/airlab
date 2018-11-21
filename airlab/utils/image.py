@@ -21,59 +21,140 @@ import sys
 
 from . import kernelFunction
 
-"""
-    Object representing an image
-"""
-class Image:
-    # Constructor for numpy arrays and pytorch tensors
-    def __init__(self, tensor_image, image_size, image_spacing, image_origin):
 
-        # distinguish between numpy array and pytorch tensors
+class Image:
+    """
+        Class representing an image in airlab
+    """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor for an image object where two cases are distinguished:
+
+        - Construct airlab image from an array or tensor (4 arguments)
+        - Construct airlab image from an SimpleITK image (less than 4 arguments
+        """
+        if len(args) == 4:
+            self.initializeForTensors(*args)
+        elif len(args) < 4:
+            self.initializeForImages(*args)
+
+
+    def initializeForTensors(self, tensor_image, image_size, image_spacing, image_origin):
+        """
+        Constructor for torch tensors and numpy ndarrays
+
+        Args:
+        tensor_image (np.ndarray | th.Tensor): n-dimensional tensor, where the last dimensions are the image dimensions while the preceeding dimensions need to empty
+        image_size (array | list | tuple): number of pixels in each space dimension
+        image_spacing (array | list | tuple): pixel size for each space dimension
+        image_origin (array | list | tuple): physical coordinate of the first pixel
+        :return (Image): an airlab image object
+        """
+
+        # distinguish between numpy array and torch tensors
         if type(tensor_image)==np.ndarray:
             self.image = th.from_numpy(tensor_image).unsqueeze_(0).unsqueeze_(0)
-        else:
+        elif type(tensor_image)==th.Tensor:
             self.image = tensor_image
+        else:
+            raise Exception("A numpy ndarray or a torch tensor was expected as argument. Got "+str(type(tensor_image)))
 
         self.size = image_size
         self.spacing = image_spacing
         self.origin = image_origin
         self.dtype = self.image.dtype
         self.device = self.image.device
-        self.ndim = len(self.image.shape)-2
+        self.ndim = len(self.image.squeeze().shape) # take only non-empty dimensions to cound space dimensions
 
-        self._reverse_axis()
 
-    def __init__(self, sitk_image, dtype=th.float32, device='cpu'):
+    def initializeForImages(self, sitk_image, dtype=th.float32, device='cpu'):
+        """
+        Constructor for SimpleITK image
+
+        Note: the order of axis are flipped in order to follow the convention of numpy and torch
+
+        sitk_image (sitk.SimpleITK.Image):  SimpleITK image
+        dtype: pixel type
+        device ('cpu'|'cuda'): on which device the image should be allocated
+        return (Image): an airlab image object
+        """
         if type(sitk_image)==sitk.SimpleITK.Image:
             self.image = th.from_numpy(sitk.GetArrayFromImage(sitk_image)).unsqueeze_(0).unsqueeze_(0)
             self.size = sitk_image.GetSize()
             self.spacing = sitk_image.GetSpacing()
             self.origin = sitk_image.GetOrigin()
             self.to(dtype, device)
-            self.ndim = len(self.image.shape) - 2
+            self.ndim = len(self.image.squeeze().shape)
 
             self._reverse_axis()
         else:
-            raise Exception("A SimpleITK image was expected as argument")
+            raise Exception("A SimpleITK image was expected as argument. Got "+str(type(sitk_image)))
+
 
     def to(self, dtype=th.float32, device='cpu'):
+        """
+        Converts the image tensor to a specified dtype and moves it to the specified device
+        """
         self.image = self.image.to(dtype=dtype, device=device)
         self.dtype = self.image.dtype
         self.device = self.image.device
 
+
     def itk(self):
+        """
+        Returns a SimpleITK image
+        """
         itk_image = sitk.GetImageFromArray(self.image.cpu().numpy()[0, 0, ...])
         itk_image.SetSpacing(spacing=self.spacing)
         itk_image.SetOrigin(origin=self.origin)
         return itk_image
 
+
     def numpy(self):
+        """
+        Returns a numpy array
+        """
         return self.image.cpu().numpy()[0, 0, ...]
 
+
+    @staticmethod
+    def read(filename, dtype=th.float32, device='cpu'):
+        """
+        Static method to directly read an image through the Image class
+
+        filename (str): filename of the image
+        dtype: specific dtype for representing the tensor
+        device: on which device the image has to be allocated
+        return (Image): an airlab image
+        """
+        return Image(sitk.ReadImage(filename), dtype, device)
+
+
+    def write(self, filename):
+        """
+        Write an image to hard drive
+
+        Note: order of axis are flipped to have the representation of SimpleITK again
+
+        filename (str): filename where the image is written
+        """
+        image = create_image_from_image(self.image, self)
+        image._reverse_axis()
+        sitk.WriteImage(image.itk(), filename)
+
+
     def _reverse_axis(self):
+        """
+        Flipps the order of the axis representing the space dimensions (preceeding dimensions are ignored)
+
+        Note: the method is inplace
+        """
         # reverse order of axis to follow the convention of SimpleITK
         self.image = self.image.squeeze_().permute(tuple(reversed(range(self.ndim))))
         self.image.unsqueeze_(0).unsqueeze_(0)
+
+
 
 """
     Object representing a displacement image

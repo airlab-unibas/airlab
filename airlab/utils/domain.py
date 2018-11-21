@@ -85,13 +85,11 @@ def GetJointDomainImages(fixed_image, moving_image, default_value=0):
     # common size
     size = np.ceil((extent-origin)/spacing).astype(int)
 
-    # create new images
-    f_image = al.Image(np.zeros(size), size, spacing, origin)
-    m_image = np.zeros(size)
+
 
     # create masks
-    f_mask = np.zeros_like(f_image)
-    m_mask = np.zeros_like(m_image)
+    f_mask = np.zeros(size)
+    m_mask = np.zeros(size)
 
     # start and end indizes for masks
     f_start = (origin - fixed_image.origin)/spacing
@@ -106,17 +104,18 @@ def GetJointDomainImages(fixed_image, moving_image, default_value=0):
     resampler = sitk.ResampleImageFilter()
     resampler.SetSize(size)
     resampler.SetOutputSpacing(spacing)
+    resampler.SetOutputOrigin(origin)
     resampler.SetDefaultPixelValue(default_value)
 
     # resample fixed image
     resampler.SetInput(fixed_image.itk())
     resampler.UpdateLargestPossibleRegion()
-    f_image = al.Image(sitk.GetArrayFromImage(resampler.GetOutput()), size, spacing, origin)
+    f_image = al.Image(resampler.GetOutput())
 
     # resample moving image
     resampler.SetInput(moving_image.itk())
     resampler.UpdateLargestPossibleRegion()
-    m_image = al.Image(sitk.GetArrayFromImage(resampler.GetOutput()), size, spacing, origin)
+    m_image = al.Image(resampler.GetOutput())
 
     return f_image, f_mask, m_image, m_mask
 
