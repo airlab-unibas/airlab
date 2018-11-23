@@ -22,10 +22,14 @@ from .kernelFunction import gaussian_kernel_1d, gaussian_kernel_2d, gaussian_ker
                             wendland_kernel_1d, wendland_kernel_2d, wendland_kernel_3d, wendland_kernel, \
                             bspline_kernel_1d, bspline_kernel_2d, bspline_kernel_3d, bspline_kernel
 
+from .domain import compute_coordinate_grid_2d, compute_coordinate_grid_3d, get_center_of_mass,\
+                    get_joint_domain_images
+
 
 __all__ = ['Image', 'Displacement', 'read_image_as_tensor', 'create_image_from_image', 'image_from_numpy',\
            'create_displacement_image_from_image', 'create_tensor_image_from_itk_image', 'create_image_pyramide',\
            'Graph', 'MatrixDiagonalElement', 'LaplaceMatrix', 'band_mv', 'expm_eig', 'expm_krylov',\
            'gaussian_kernel_1d', 'gaussian_kernel_2d', 'gaussian_kernel_3d', 'gaussian_kernel',\
            'wendland_kernel_1d', 'wendland_kernel_2d', 'wendland_kernel_3d', 'wendland_kernel',\
-           'bspline_kernel_1d', 'bspline_kernel_2d', 'bspline_kernel_3d', 'bspline_kernel']
+           'bspline_kernel_1d', 'bspline_kernel_2d', 'bspline_kernel_3d', 'bspline_kernel',\
+           'compute_coordinate_grid_2d', 'compute_coordinate_grid_3d', 'get_center_of_mass', 'get_joint_domain_images']

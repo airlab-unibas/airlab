@@ -1,12 +1,25 @@
+# Copyright 2018 University of Basel, Center for medical Image Analysis and Navigation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import numpy as np
 import SimpleITK as sitk
-import airlab as al
+from .image import Image
 
 """
 Create a two dimensional coordinate grid
 """
-def _compute_coordinate_grid_2d(image):
+def compute_coordinate_grid_2d(image):
 
     x = np.linspace(0, image.size[0] - 1, num=image.size[0])
     y = np.linspace(0, image.size[1] - 1, num=image.size[1])
@@ -18,7 +31,7 @@ def _compute_coordinate_grid_2d(image):
 """
 Create a three dimensional coordinate grid
 """
-def _compute_coordinate_grid_3d(image):
+def compute_coordinate_grid_3d(image):
 
     x = np.linspace(0, image.size[0] - 1, num=image.size[0])
     y = np.linspace(0, image.size[1] - 1, num=image.size[1])
@@ -29,7 +42,7 @@ def _compute_coordinate_grid_3d(image):
     return [x_m, y_m, z_m]
 
 
-def CenterOfMass(image):
+def get_center_of_mass(image):
     """
     Returns the center of mass of the image (weighted average of coordinates where the intensity values serve as weights)
 
@@ -44,12 +57,12 @@ def CenterOfMass(image):
     coordinate_value_array[:, 0] = values
 
     if len(image.size)==2:
-        X, Y = _compute_coordinate_grid_2d(image)
+        X, Y = compute_coordinate_grid_2d(image)
         coordinate_value_array[:, 1] = X.reshape(num_points)
         coordinate_value_array[:, 2] = Y.reshape(num_points)
 
     elif len(image.size)==3:
-        X, Y, Z = _compute_coordinate_grid_3d(image)
+        X, Y, Z = _ompute_coordinate_grid_3d(image)
         coordinate_value_array[:, 1] = X.reshape(num_points)
         coordinate_value_array[:, 2] = Y.reshape(num_points)
         coordinate_value_array[:, 3] = Z.reshape(num_points)
@@ -67,12 +80,15 @@ def CenterOfMass(image):
     return cm
 
 
-def GetJointDomainImages(fixed_image, moving_image, default_value=0, interpolator=2):
+def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpolator=2, cm_alignment=False):
     """
     The method brings the fixed and moving image in a common image domain in order to be compatible with the
     registration framework of airlab. Different from the ITK convention, the registration in airlab is performed
     on pixels and not on points. This allows an efficient evaluation of the image metrics and the synthesis of
     displacement fields.
+
+    If the images already have the same image domain (after a possible center of mass alignment) no resampling is
+    performed and only masks are generated for return.
 
     Step 1: The moving image is aligned to the fixed image by matching the center of mass of the two images.
     Step 2: The new image domain is the smallest possible domain where both images are contained completely.
@@ -87,11 +103,21 @@ def GetJointDomainImages(fixed_image, moving_image, default_value=0, interpolato
     moving_image (Image): moving image provided as airlab image
     default_value (float|int): default value which defines the value which is set where the images are not defined in the new domain
     interpolator (int):  nn=1, linear=2, bspline=3
+    cm_alignment (bool): defines whether the center of mass refinement should be performed prior to the resampling
     return (tuple): resampled fixed image, fixed mask, resampled moving image, moving mask
     """
 
     # align images using center of mass
-    moving_image.origin = moving_image.origin - CenterOfMass(moving_image) + CenterOfMass(fixed_image)
+    if cm_alignment:
+        moving_image.origin = moving_image.origin - get_center_of_mass(moving_image) + get_center_of_mass(fixed_image)
+
+    # check if domains are equal, as then nothing has to be resampled
+    if np.all(fixed_image.origin == moving_image.origin) and\
+            np.all(fixed_image.spacing == moving_image.spacing) and\
+            np.all(fixed_image.size == moving_image.size):
+        f_mask = np.ones_like(fixed_image.image)
+        m_mask = np.ones_like(moving_image.image)
+        return fixed_image, f_mask, moving_image, m_mask
 
     # common origin
     origin = np.minimum(fixed_image.origin, moving_image.origin)
@@ -123,8 +149,8 @@ def GetJointDomainImages(fixed_image, moving_image, default_value=0, interpolato
     resampler.SetInterpolator(interpolator)
 
     # resample fixed and moving image
-    f_image = al.Image(resampler.Execute(fixed_image.itk()))
-    m_image = al.Image(resampler.Execute(moving_image.itk()))
+    f_image = Image(resampler.Execute(fixed_image.itk()))
+    m_image = Image(resampler.Execute(moving_image.itk()))
 
     # create masks
     f_mask = np.ones_like(f_image.image)
@@ -133,6 +159,7 @@ def GetJointDomainImages(fixed_image, moving_image, default_value=0, interpolato
     f_mask[np.where(f_image.image == minimum_value)] = 0
     m_mask[np.where(m_image.image == minimum_value)] = 0
 
+    # reset default value in images
     f_image.image[np.where(f_image.image == minimum_value)] = default_value
     m_image.image[np.where(m_image.image == minimum_value)] = default_value
 
