@@ -65,7 +65,7 @@ class Image:
         self.origin = image_origin
         self.dtype = self.image.dtype
         self.device = self.image.device
-        self.ndim = len(self.image.squeeze().shape) # take only non-empty dimensions to cound space dimensions
+        self.ndim = len(self.image.squeeze().shape) # take only non-empty dimensions to count space dimensions
 
 
     def initializeForImages(self, sitk_image, dtype=th.float32, device='cpu'):
@@ -104,8 +104,14 @@ class Image:
     def itk(self):
         """
         Returns a SimpleITK image
+
+        Note: the order of axis is flipped back to the convention of SimpleITK
         """
-        itk_image = sitk.GetImageFromArray(self.image.cpu().numpy()[0, 0, ...])
+        image = Image(self.image.cpu().clone(), self.size, self.spacing, self.origin)
+        image._reverse_axis()
+        image.image.squeeze_()
+
+        itk_image = sitk.GetImageFromArray(image.image.numpy())
         itk_image.SetSpacing(spacing=self.spacing)
         itk_image.SetOrigin(origin=self.origin)
         return itk_image
@@ -115,7 +121,7 @@ class Image:
         """
         Returns a numpy array
         """
-        return self.image.cpu().numpy()[0, 0, ...]
+        return self.image.cpu().squeeze().numpy()
 
 
     @staticmethod
@@ -139,9 +145,7 @@ class Image:
 
         filename (str): filename where the image is written
         """
-        image = create_image_from_image(self.image, self)
-        image._reverse_axis()
-        sitk.WriteImage(image.itk(), filename)
+        sitk.WriteImage(self.itk(), filename)
 
 
     def _reverse_axis(self):
@@ -153,7 +157,6 @@ class Image:
         # reverse order of axis to follow the convention of SimpleITK
         self.image = self.image.squeeze_().permute(tuple(reversed(range(self.ndim))))
         self.image.unsqueeze_(0).unsqueeze_(0)
-
 
 
 """

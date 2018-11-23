@@ -30,13 +30,15 @@ def _compute_coordinate_grid_3d(image):
 
 
 def CenterOfMass(image):
-    # input is an airlab image
+    """
+    Returns the center of mass of the image (weighted average of coordinates where the intensity values serve as weights)
 
-    # average over image coordinates by average their contribution to the average
-    # with the image intensity at their respective location
+    image (Image): input is an airlab image
+    return (array): coordinates of the center of mass
+    """
 
     num_points = np.prod(image.size)
-    coordinate_value_array = np.zeros([num_points, len(image.size)+1]) # allocate coordinate value array
+    coordinate_value_array = np.zeros([num_points, len(image.size)+1])  # allocate coordinate value array
 
     values = image.image.squeeze().numpy().reshape(num_points)  # vectorize image
     coordinate_value_array[:, 0] = values
@@ -62,11 +64,31 @@ def CenterOfMass(image):
     cm = np.average(coordinate_value_array[:, 1:], axis=0, weights=coordinate_value_array[:, 0])
     cm = cm * image.spacing + image.origin
 
-    # return center of mass
     return cm
 
 
-def GetJointDomainImages(fixed_image, moving_image, default_value=0):
+def GetJointDomainImages(fixed_image, moving_image, default_value=0, interpolator=2):
+    """
+    The method brings the fixed and moving image in a common image domain in order to be compatible with the
+    registration framework of airlab. Different from the ITK convention, the registration in airlab is performed
+    on pixels and not on points. This allows an efficient evaluation of the image metrics and the synthesis of
+    displacement fields.
+
+    Step 1: The moving image is aligned to the fixed image by matching the center of mass of the two images.
+    Step 2: The new image domain is the smallest possible domain where both images are contained completely.
+            The minimum spacing is taken as new spacing. This second step can increase the amount of pixels.
+    Step 3: Fixed and moving image are resampled on this new domain.
+    Step 4: Masks are built which defines in which region the respective image is not defined on this new domain.
+
+    Note: The minimum possible value of the fixed image type is used as placeholder when resampling.
+          Hence, this value should not be present in the images
+
+    fixed_image (Image): fixed image provided as airlab image
+    moving_image (Image): moving image provided as airlab image
+    default_value (float|int): default value which defines the value which is set where the images are not defined in the new domain
+    interpolator (int):  nn=1, linear=2, bspline=3
+    return (tuple): resampled fixed image, fixed mask, resampled moving image, moving mask
+    """
 
     # align images using center of mass
     moving_image.origin = moving_image.origin - CenterOfMass(moving_image) + CenterOfMass(fixed_image)
@@ -85,33 +107,34 @@ def GetJointDomainImages(fixed_image, moving_image, default_value=0):
     # common size
     size = np.ceil((extent-origin)/spacing).astype(int)
 
+    # Resample images
+    # fixed and moving image are resampled in new domain
+    # the default value for resampling is set to a predefined value
+    # (minimum possible value of the fixed image type) to use it
+    # to create masks. At the end, default values are replaced with
+    # the provided default value
+    minimum_value = float(np.finfo(fixed_image.image.numpy().dtype).tiny)
 
-    # create masks
-    f_mask = np.zeros(size)
-    m_mask = np.zeros(size)
-
-    # start and end indizes for masks
-    f_start = (fixed_image.origin - origin)/spacing
-    f_end = size - (extent - f_extent)/spacing
-    m_start = (moving_image.origin - origin) / spacing
-    m_end = size - (extent - m_extent) / spacing
-
-    #fill masks
-
-
-
-    # resample fixed image
     resampler = sitk.ResampleImageFilter()
     resampler.SetSize(size.tolist())
     resampler.SetOutputSpacing(spacing)
     resampler.SetOutputOrigin(origin)
-    resampler.SetDefaultPixelValue(default_value)
+    resampler.SetDefaultPixelValue(minimum_value)
+    resampler.SetInterpolator(interpolator)
 
-    # resample fixed image
+    # resample fixed and moving image
     f_image = al.Image(resampler.Execute(fixed_image.itk()))
-
-    # resample moving image
     m_image = al.Image(resampler.Execute(moving_image.itk()))
+
+    # create masks
+    f_mask = np.ones_like(f_image.image)
+    m_mask = np.ones_like(m_image.image)
+
+    f_mask[np.where(f_image.image == minimum_value)] = 0
+    m_mask[np.where(m_image.image == minimum_value)] = 0
+
+    f_image.image[np.where(f_image.image == minimum_value)] = default_value
+    m_image.image[np.where(m_image.image == minimum_value)] = default_value
 
     return f_image, f_mask, m_image, m_mask
 
