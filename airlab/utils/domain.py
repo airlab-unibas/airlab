@@ -62,7 +62,7 @@ def get_center_of_mass(image):
         coordinate_value_array[:, 2] = Y.reshape(num_points)
 
     elif len(image.size)==3:
-        X, Y, Z = _ompute_coordinate_grid_3d(image)
+        X, Y, Z = compute_coordinate_grid_3d(image)
         coordinate_value_array[:, 1] = X.reshape(num_points)
         coordinate_value_array[:, 2] = Y.reshape(num_points)
         coordinate_value_array[:, 3] = Z.reshape(num_points)
@@ -80,7 +80,7 @@ def get_center_of_mass(image):
     return cm
 
 
-def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpolator=2, cm_alignment=False):
+def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpolator=2, cm_alignment=False, compute_masks=False):
     """
     The method brings the fixed and moving image in a common image domain in order to be compatible with the
     registration framework of airlab. Different from the ITK convention, the registration in airlab is performed
@@ -106,6 +106,8 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     cm_alignment (bool): defines whether the center of mass refinement should be performed prior to the resampling
     return (tuple): resampled fixed image, fixed mask, resampled moving image, moving mask
     """
+    f_mask = None
+    m_mask = None
 
     # align images using center of mass
     if cm_alignment:
@@ -115,8 +117,9 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     if np.all(fixed_image.origin == moving_image.origin) and\
             np.all(fixed_image.spacing == moving_image.spacing) and\
             np.all(fixed_image.size == moving_image.size):
-        f_mask = np.ones_like(fixed_image.image)
-        m_mask = np.ones_like(moving_image.image)
+        if compute_masks:
+            f_mask = np.ones_like(fixed_image.image)
+            m_mask = np.ones_like(moving_image.image)
         return fixed_image, f_mask, moving_image, m_mask
 
     # common origin
@@ -139,7 +142,9 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     # (minimum possible value of the fixed image type) to use it
     # to create masks. At the end, default values are replaced with
     # the provided default value
-    minimum_value = float(np.finfo(fixed_image.image.numpy().dtype).tiny)
+    minimum_value = default_value
+    if compute_masks:
+        minimum_value = float(np.finfo(fixed_image.image.numpy().dtype).tiny)
 
     resampler = sitk.ResampleImageFilter()
     resampler.SetSize(size.tolist())
@@ -153,15 +158,16 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     m_image = Image(resampler.Execute(moving_image.itk()))
 
     # create masks
-    f_mask = np.ones_like(f_image.image)
-    m_mask = np.ones_like(m_image.image)
+    if compute_masks:
+        f_mask = np.ones_like(f_image.image)
+        m_mask = np.ones_like(m_image.image)
 
-    f_mask[np.where(f_image.image == minimum_value)] = 0
-    m_mask[np.where(m_image.image == minimum_value)] = 0
+        f_mask[np.where(f_image.image == minimum_value)] = 0
+        m_mask[np.where(m_image.image == minimum_value)] = 0
 
-    # reset default value in images
-    f_image.image[np.where(f_image.image == minimum_value)] = default_value
-    m_image.image[np.where(m_image.image == minimum_value)] = default_value
+        # reset default value in images
+        f_image.image[np.where(f_image.image == minimum_value)] = default_value
+        m_image.image[np.where(m_image.image == minimum_value)] = default_value
 
     return f_image, f_mask, m_image, m_mask
 
