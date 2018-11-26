@@ -54,9 +54,9 @@ class Image:
 
         # distinguish between numpy array and torch tensors
         if type(tensor_image)==np.ndarray:
-            self.image = th.from_numpy(tensor_image).unsqueeze_(0).unsqueeze_(0)
+            self.image = th.from_numpy(tensor_image).squeeze_().unsqueeze_(0).unsqueeze_(0)
         elif type(tensor_image)==th.Tensor:
-            self.image = tensor_image
+            self.image = tensor_image.squeeze_().unsqueeze_(0).unsqueeze_(0)
         else:
             raise Exception("A numpy ndarray or a torch tensor was expected as argument. Got "+str(type(tensor_image)))
 

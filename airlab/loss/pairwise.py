@@ -81,27 +81,45 @@ class MSE(_PairwiseImageLoss):
         reduce (bool): Reduce loss function to a single value
 
     """
-    def __init__(self, fixed_image, moving_image, size_average=True, reduce=True):
+    def __init__(self, fixed_image, moving_image, fixed_mask=None, moving_mask=None, size_average=True, reduce=True):
         super(MSE, self).__init__(fixed_image, moving_image, size_average, reduce)
 
         self.name = "mse"
 
+        self.fixed_mask = fixed_mask
+        self.moving_mask = moving_mask
+
         self.warped_moving_image = None
+        self.warped_moving_mask = None
+
+        self.do_masking = not self.fixed_mask is None and not self.moving_mask is None
 
     def forward(self, displacement):
 
         displacement = self._grid + displacement
 
+        self.warped_moving_image = F.grid_sample(self._moving_image.image, displacement)
+
+        value = (self.warped_moving_image - self._fixed_image.image).pow(2)
+
+        # exclude points which are transformed outside the image domain
         mask = th.zeros_like(self._fixed_image.image, dtype=th.uint8, device=self._device)
         for dim in range(displacement.size()[-1]):
             mask += displacement[..., dim].gt(1) + displacement[..., dim].lt(-1)
 
         mask = mask == 0
 
-        self.warped_moving_image = F.grid_sample(self._moving_image.image, displacement)
+        # and exclude points which are masked by the warped moving and the fixed mask
+        if self.do_masking:
+            self.warped_moving_mask = F.grid_sample(self.moving_mask.image, displacement)
+            self.warped_moving_mask[self.warped_moving_mask >= 0.5] = 1
+            self.warped_moving_mask[self.warped_moving_mask < 0.5] = 0
 
-        value = (self.warped_moving_image - self._fixed_image.image).pow(2)
+            # if either the warped moving mask or the fixed mask is zero take zero,
+            # otherwise take the value of mask
+            mask = th.where(((self.warped_moving_mask == 0) | (self.fixed_mask == 0)), th.zeros_like(mask), mask)
 
+        # mask values
         value = th.masked_select(value, mask)
 
         return self.return_loss(value)

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import numpy as np
+import torch as th
 import SimpleITK as sitk
 from .image import Image
 
@@ -53,7 +54,7 @@ def get_center_of_mass(image):
     num_points = np.prod(image.size)
     coordinate_value_array = np.zeros([num_points, len(image.size)+1])  # allocate coordinate value array
 
-    values = image.image.squeeze().numpy().reshape(num_points)  # vectorize image
+    values = image.image.squeeze().cpu().numpy().reshape(num_points)  # vectorize image
     coordinate_value_array[:, 0] = values
 
     if len(image.size)==2:
@@ -84,8 +85,8 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     """
     The method brings the fixed and moving image in a common image domain in order to be compatible with the
     registration framework of airlab. Different from the ITK convention, the registration in airlab is performed
-    on pixels and not on points. This allows an efficient evaluation of the image metrics and the synthesis of
-    displacement fields.
+    on pixels and not on points. This allows an efficient evaluation of the image metrics, the synthesis of
+    displacement fields and warp of the moving image.
 
     If the images already have the same image domain (after a possible center of mass alignment) no resampling is
     performed and only masks are generated for return.
@@ -104,6 +105,7 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     default_value (float|int): default value which defines the value which is set where the images are not defined in the new domain
     interpolator (int):  nn=1, linear=2, bspline=3
     cm_alignment (bool): defines whether the center of mass refinement should be performed prior to the resampling
+    compute_masks (bool): defines whether the masks should be created. otherwise, None is returned as masks.
     return (tuple): resampled fixed image, fixed mask, resampled moving image, moving mask
     """
     f_mask = None
@@ -144,7 +146,7 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     # the provided default value
     minimum_value = default_value
     if compute_masks:
-        minimum_value = float(np.finfo(fixed_image.image.numpy().dtype).tiny)
+        minimum_value = float(np.finfo(fixed_image.image.cpu().numpy().dtype).tiny)
 
     resampler = sitk.ResampleImageFilter()
     resampler.SetSize(size.tolist())
@@ -157,17 +159,31 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     f_image = Image(resampler.Execute(fixed_image.itk()))
     m_image = Image(resampler.Execute(moving_image.itk()))
 
+    f_image.to(dtype=fixed_image.dtype, device=fixed_image.device)
+    m_image.to(dtype=moving_image.dtype, device=moving_image.device)
+
     # create masks
     if compute_masks:
-        f_mask = np.ones_like(f_image.image)
-        m_mask = np.ones_like(m_image.image)
+        f_mask = th.ones_like(f_image.image)
+        m_mask = th.ones_like(m_image.image)
 
-        f_mask[np.where(f_image.image == minimum_value)] = 0
-        m_mask[np.where(m_image.image == minimum_value)] = 0
+        f_mask[f_image.image == minimum_value] = 0
+        m_mask[m_image.image == minimum_value] = 0
+        #f_mask[np.where(f_image.image == minimum_value)] = 0
+        #m_mask[np.where(m_image.image == minimum_value)] = 0
+
+        f_mask = Image(f_mask, size, spacing, origin)
+        m_mask = Image(m_mask, size, spacing, origin)
+
+        f_mask.to(dtype=fixed_image.dtype, device=fixed_image.device)
+        m_mask.to(dtype=moving_image.dtype, device=moving_image.device)
 
         # reset default value in images
-        f_image.image[np.where(f_image.image == minimum_value)] = default_value
-        m_image.image[np.where(m_image.image == minimum_value)] = default_value
+        f_image.image[f_image.image == minimum_value] = default_value
+        m_image.image[m_image.image == minimum_value] = default_value
+
+        #f_image.image[np.where(f_image.image == minimum_value)] = default_value
+        #m_image.image[np.where(m_image.image == minimum_value)] = default_value
 
     return f_image, f_mask, m_image, m_mask
 
