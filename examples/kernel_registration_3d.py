@@ -33,37 +33,37 @@ def main():
     # set the used data type
     dtype = th.float32
     # set the device for the computaion to CPU
-    device = th.device("cuda:0")
+    #device = th.device("cpu")
 
     # In order to use a GPU uncomment the following line. The number is the device index of the used GPU
     # Here, the GPU with the index 0 is used.
-    #device = th.device("cuda:0")
+    device = th.device("cuda:0")
 
-    # load the image data and normalize to [0, 1]
-    itkImg = sitk.ReadImage("./data/brain_3d_fixed.mha", sitk.sitkFloat32)
-    itkImg = sitk.RescaleIntensity(itkImg, 0, 1)
-    fixed_image = al.Image(itkImg)
-    fixed_image.to(dtype, device)
+    # load the image data and normalize intensities to [0, 1]
+    loader = al.ImageLoader("/tmp/")
 
-    itkImg = sitk.ReadImage("./data/brain_3d_moving.mha", sitk.sitkFloat32)
-    itkImg = sitk.RescaleIntensity(itkImg, 0, 1)
-    moving_image = al.Image(itkImg)
-    moving_image.to(dtype, device)
+    fixed_image = loader.load("4DCT_P1", "image_00").to(dtype, device)
+    fixed_image.image -= fixed_image.image.min()
+    fixed_image.image /= fixed_image.image.max()
+
+    moving_image = loader.load("4DCT_P5", "image_00").to(dtype, device)
+    moving_image.image -= moving_image.image.min()
+    moving_image.image /= moving_image.image.max()
 
     f_image, f_mask, m_image, m_mask = al.get_joint_domain_images(fixed_image, moving_image, cm_alignment=True, compute_masks=True)
 
-    # create image pyramide size/4, size/2, size/1
-    fixed_image_pyramide = al.create_image_pyramide(f_image, [[4, 4, 4], [2, 2, 2]])
-    fixed_mask_pyramide = al.create_image_pyramide(f_mask, [[4, 4, 4], [2, 2, 2]])
-    moving_image_pyramide = al.create_image_pyramide(m_image, [[4, 4, 4], [2, 2, 2]])
-    moving_mask_pyramide = al.create_image_pyramide(m_mask, [[4, 4, 4], [2, 2, 2]])
+    # create image pyramid size/4, size/2, size/1
+    fixed_image_pyramid = al.create_image_pyramid(f_image, [[4, 4, 4], [2, 2, 2]])
+    fixed_mask_pyramid = al.create_image_pyramid(f_mask, [[4, 4, 4], [2, 2, 2]])
+    moving_image_pyramid = al.create_image_pyramid(m_image, [[4, 4, 4], [2, 2, 2]])
+    moving_mask_pyramid = al.create_image_pyramid(m_mask, [[4, 4, 4], [2, 2, 2]])
 
     constant_displacement = None
     regularisation_weight = [1, 5, 50]
-    number_of_iterations = [500, 500, 500]
-    sigma = [[11, 11, 11], [11, 11, 11], [3, 3, 3]]
+    number_of_iterations = [300, 200, 100]
+    sigma = [[11, 11, 11], [9, 9, 9], [3, 3, 3]]
 
-    for level, (mov_im_level, mov_msk_level, fix_im_level, fix_msk_level) in enumerate(zip(moving_image_pyramide, moving_mask_pyramide, fixed_image_pyramide, fixed_mask_pyramide)):
+    for level, (mov_im_level, mov_msk_level, fix_im_level, fix_msk_level) in enumerate(zip(moving_image_pyramid, moving_mask_pyramid, fixed_image_pyramid, fixed_mask_pyramid)):
 
         registration = al.PairwiseRegistration(dtype=dtype, device=device)
 
@@ -106,41 +106,23 @@ def main():
 
     # create final result
     displacement = transformation.get_displacement()
-    warped_image = al.transformation.utils.warp_image(moving_image, displacement)
-    displacement = al.create_displacement_image_from_image(displacement, moving_image)
+    warped_image = al.transformation.utils.warp_image(m_image, displacement)
+    displacement = al.transformation.utils.unit_displacement_to_dispalcement(displacement) # unit measures to image domain measures
+    displacement = al.create_displacement_image_from_image(displacement, m_image)
 
     end = time.time()
 
     print("=================================================================")
 
-    print("Registration done in: ", end - start)
-    print("Result parameters:")
-
-    # plot the results
-    plt.subplot(221)
-    plt.imshow(fixed_image.numpy(), cmap='gray')
-    plt.title('Fixed Image')
-
-    plt.subplot(222)
-    plt.imshow(moving_image.numpy(), cmap='gray')
-    plt.title('Moving Image')
-
-    plt.subplot(223)
-    plt.imshow(warped_image.numpy(), cmap='gray')
-    plt.title('Warped Moving Image')
-
-    plt.subplot(224)
-    plt.imshow(displacement.magnitude().numpy(), cmap='jet')
-    plt.title('Magnitude Displacement')
-
-    plt.show()
+    print("Registration done in: ", end - start, " seconds")
 
     # write result images
-    # sitk.WriteImage(warped_image.itk(), '/tmp/rigid_warped_image.vtk')
-    # sitk.WriteImage(moving_image.itk(), '/tmp/rigid_moving_image.vtk')
-    # sitk.WriteImage(fixed_image.itk(), '/tmp/rigid_fixed_image.vtk')
-    # sitk.WriteImage(displacement.itk(), '/tmp/demons_displacement_image.vtk')
-
+    warped_image.write('/tmp/bspline_warped_image.vtk')
+    m_image.write('/tmp/bspline_moving_image.vtk')
+    m_mask.write('/tmp/bspline_moving_mask.vtk')
+    f_image.write('/tmp/bspline_fixed_image.vtk')
+    f_mask.write('/tmp/bspline_fixed_mask.vtk')
+    displacement.write('/tmp/bspline_displacement_image.vtk')
 
 
 

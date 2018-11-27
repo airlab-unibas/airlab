@@ -120,8 +120,8 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
             np.all(fixed_image.spacing == moving_image.spacing) and\
             np.all(fixed_image.size == moving_image.size):
         if compute_masks:
-            f_mask = np.ones_like(fixed_image.image)
-            m_mask = np.ones_like(moving_image.image)
+            f_mask = th.ones_like(fixed_image.image)
+            m_mask = th.ones_like(moving_image.image)
         return fixed_image, f_mask, moving_image, m_mask
 
     # common origin
@@ -169,21 +169,13 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
 
         f_mask[f_image.image == minimum_value] = 0
         m_mask[m_image.image == minimum_value] = 0
-        #f_mask[np.where(f_image.image == minimum_value)] = 0
-        #m_mask[np.where(m_image.image == minimum_value)] = 0
 
         f_mask = Image(f_mask, size, spacing, origin)
         m_mask = Image(m_mask, size, spacing, origin)
 
-        f_mask.to(dtype=fixed_image.dtype, device=fixed_image.device)
-        m_mask.to(dtype=moving_image.dtype, device=moving_image.device)
-
         # reset default value in images
         f_image.image[f_image.image == minimum_value] = default_value
         m_image.image[m_image.image == minimum_value] = default_value
-
-        #f_image.image[np.where(f_image.image == minimum_value)] = default_value
-        #m_image.image[np.where(m_image.image == minimum_value)] = default_value
 
     return f_image, f_mask, m_image, m_mask
 

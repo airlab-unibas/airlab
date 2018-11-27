@@ -25,17 +25,20 @@ from ..utils import kernelFunction as utils
 
 # Loss base class (standard from PyTorch)
 class _PairwiseImageLoss(th.nn.modules.Module):
-    def __init__(self, fixed_image, moving_image, size_average=True, reduce=True):
+    def __init__(self, fixed_image, moving_image, fixed_mask=None, moving_mask=None, size_average=True, reduce=True):
         super(_PairwiseImageLoss, self).__init__()
         self._size_average = size_average
         self._reduce = reduce
         self.name = "parent"
 
         self._warped_moving_image = None
+        self._warped_moving_mask = None
         self._weight = 1
 
         self._moving_image = moving_image
+        self._moving_mask = moving_mask
         self._fixed_image = fixed_image
+        self._fixed_mask = fixed_mask
         self._grid = None
 
         assert self._moving_image != None and self._fixed_image != None
@@ -52,6 +55,33 @@ class _PairwiseImageLoss(th.nn.modules.Module):
 
     def GetWarpedImage(self):
         return self._warped_moving_image[0, 0, ...].detach().cpu()
+
+    def GetCurrentMask(self, displacement):
+        """
+        Computes a mask defining if pixels are warped outside the image domain, or if they fall into
+        a fixed image mask or a warped moving image mask.
+        return (Tensor): maks array
+        """
+        # exclude points which are transformed outside the image domain
+        mask = th.zeros_like(self._fixed_image.image, dtype=th.uint8, device=self._device)
+        for dim in range(displacement.size()[-1]):
+            mask += displacement[..., dim].gt(1) + displacement[..., dim].lt(-1)
+
+        mask = mask == 0
+
+        # and exclude points which are masked by the warped moving and the fixed mask
+        if not self._moving_mask is None:
+            self._warped_moving_mask = F.grid_sample(self._moving_mask.image, displacement)
+            self._warped_moving_mask = self._warped_moving_mask >= 0.5
+
+            # if either the warped moving mask or the fixed mask is zero take zero,
+            # otherwise take the value of mask
+            if not self._fixed_mask is None:
+                mask = th.where(((self._warped_moving_mask == 0) | (self._fixed_mask == 0)), th.zeros_like(mask), mask)
+            else:
+                mask = th.where((self._warped_moving_mask == 0), th.zeros_like(mask), mask)
+
+        return mask
 
     def set_loss_weight(self, weight):
         self._weight = weight
@@ -82,42 +112,25 @@ class MSE(_PairwiseImageLoss):
 
     """
     def __init__(self, fixed_image, moving_image, fixed_mask=None, moving_mask=None, size_average=True, reduce=True):
-        super(MSE, self).__init__(fixed_image, moving_image, size_average, reduce)
+        super(MSE, self).__init__(fixed_image, moving_image, fixed_mask, moving_mask, size_average, reduce)
 
         self.name = "mse"
 
-        self.fixed_mask = fixed_mask
-        self.moving_mask = moving_mask
-
         self.warped_moving_image = None
-        self.warped_moving_mask = None
-
-        self.do_masking = not self.fixed_mask is None and not self.moving_mask is None
 
     def forward(self, displacement):
 
+        # compute displacement field
         displacement = self._grid + displacement
 
+        # compute current mask
+        mask = super(MSE, self).GetCurrentMask(displacement)
+
+        # warp moving image with dispalcement field
         self.warped_moving_image = F.grid_sample(self._moving_image.image, displacement)
 
+        # compute squared differences
         value = (self.warped_moving_image - self._fixed_image.image).pow(2)
-
-        # exclude points which are transformed outside the image domain
-        mask = th.zeros_like(self._fixed_image.image, dtype=th.uint8, device=self._device)
-        for dim in range(displacement.size()[-1]):
-            mask += displacement[..., dim].gt(1) + displacement[..., dim].lt(-1)
-
-        mask = mask == 0
-
-        # and exclude points which are masked by the warped moving and the fixed mask
-        if self.do_masking:
-            self.warped_moving_mask = F.grid_sample(self.moving_mask.image, displacement)
-            self.warped_moving_mask[self.warped_moving_mask >= 0.5] = 1
-            self.warped_moving_mask[self.warped_moving_mask < 0.5] = 0
-
-            # if either the warped moving mask or the fixed mask is zero take zero,
-            # otherwise take the value of mask
-            mask = th.where(((self.warped_moving_mask == 0) | (self.fixed_mask == 0)), th.zeros_like(mask), mask)
 
         # mask values
         value = th.masked_select(value, mask)
@@ -140,8 +153,8 @@ class NCC(_PairwiseImageLoss):
             moving_image (Image): Moving image for the registration
 
     """
-    def __init__(self, fixed_image, moving_image):
-        super(NCC, self).__init__(fixed_image, moving_image, False, False)
+    def __init__(self, fixed_image, moving_image, fixed_mask=None, moving_mask=None):
+        super(NCC, self).__init__(fixed_image, moving_image, fixed_mask, moving_mask, False, False)
 
         self.name = "ncc"
 
@@ -149,13 +162,11 @@ class NCC(_PairwiseImageLoss):
 
     def forward(self, displacement):
 
+        # compute displacement field
         displacement = self._grid + displacement
 
-        mask = th.zeros_like(self._fixed_image.image, dtype=th.uint8, device=self._device)
-        for dim in range(displacement.size()[-1]):
-            mask += displacement[..., dim].gt(1) + displacement[..., dim].lt(-1)
-
-        mask = mask == 0
+        # compute current mask
+        mask = super(NCC, self).GetCurrentMask(displacement)
 
         self._warped_moving_image = F.grid_sample(self._moving_image.image, displacement)
 
@@ -173,8 +184,8 @@ class NCC(_PairwiseImageLoss):
     Local Normaliced Cross Corelation Image Loss
 """
 class LCC(_PairwiseImageLoss):
-    def __init__(self, fixed_image, moving_image, sigma=3, kernel_type="box", size_average=True, reduce=True):
-        super(LCC, self).__init__(fixed_image, moving_image, size_average, reduce)
+    def __init__(self, fixed_image, moving_image,fixed_mask=None, moving_mask=None, sigma=3, kernel_type="box", size_average=True, reduce=True):
+        super(LCC, self).__init__(fixed_image, moving_image, fixed_mask, moving_mask,  size_average, reduce)
 
         self.name = "lcc"
         self.warped_moving_image = th.empty_like(self._moving_image.image, dtype=self._dtype, device=self._device)
@@ -244,13 +255,12 @@ class LCC(_PairwiseImageLoss):
 
     def forward(self, displacement):
 
+        # compute displacement field
         displacement = self._grid + displacement
 
-        mask = th.zeros_like(self._fixed_image.image, dtype=th.uint8, device=self._device)
-        for dim in range(displacement.size()[-1]):
-            mask += displacement[..., dim].gt(1) + displacement[..., dim].lt(-1)
-
-        mask = mask > 0
+        # compute current mask
+        mask = super(LCC, self).GetCurrentMask(displacement)
+        mask = 1-mask
         mask = mask.to(dtype=self._dtype, device=self._device)
 
         self._warped_moving_image = F.grid_sample(self._moving_image.image, displacement)

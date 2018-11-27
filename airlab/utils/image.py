@@ -100,6 +100,8 @@ class Image:
         self.dtype = self.image.dtype
         self.device = self.image.device
 
+        return self
+
 
     def itk(self):
         """
@@ -150,7 +152,7 @@ class Image:
 
     def _reverse_axis(self):
         """
-        Flipps the order of the axis representing the space dimensions (preceeding dimensions are ignored)
+        Flips the order of the axis representing the space dimensions (preceeding dimensions are ignored)
 
         Note: the method is inplace
         """
@@ -167,11 +169,17 @@ class Displacement(Image):
         super(Displacement, self).__init__(tensor_image, image_size, image_spacing, image_origin)
 
     def itk(self):
+
+        # flip axis to
+        df = Displacement(self.image.clone(), self.size, self.spacing, self.origin)
+        df._reverse_axis()
+        df.image.squeeze_()
+        df.image = df.image.cpu()
+
         if len(self.size) == 2:
-            numpy_disp = self.image.cpu().numpy()
-            itk_displacement = sitk.GetImageFromArray(numpy_disp, isVector=True)
+            itk_displacement = sitk.GetImageFromArray(df.image.numpy(), isVector=True)
         elif len(self.size) == 3:
-            itk_displacement = sitk.GetImageFromArray(self.image.cpu().numpy())
+            itk_displacement = sitk.GetImageFromArray(df.image.numpy())
 
         itk_displacement.SetSpacing(spacing=self.spacing)
         itk_displacement.SetOrigin(origin=self.origin)
@@ -186,6 +194,32 @@ class Displacement(Image):
     def numpy(self):
         return self.image.cpu().numpy()
 
+    def _reverse_axis(self):
+        """
+        Flips the order of the axis representing the space dimensions (preceeding dimensions are ignored).
+        Respectively, the axis holding the vectors is flipped as well
+
+        Note: the method is inplace
+        """
+        # reverse order of axis to follow the convention of SimpleITK
+        order = list(reversed(range(self.ndim-1)))
+        order.append(len(order))
+        self.image = self.image.squeeze_().permute(tuple(order))
+        self.image = flip(self.image, self.ndim-1)
+        self.image.unsqueeze_(0).unsqueeze_(0)
+
+
+def flip(x, dim):
+    """
+    Flip order of a specific dimension dim
+
+    x (Tensor): input tensor
+    dim (int): axis which should be flipped
+    return (Tensor): returns the tensor with the specified axis flipped
+    """
+    indices = [slice(None)] * x.dim()
+    indices[dim] = th.arange(x.size(dim) - 1, -1, -1, dtype=th.long, device=x.device)
+    return x[tuple(indices)]
 
 """
     Convert an image to tensor representation
@@ -252,7 +286,7 @@ def create_tensor_image_from_itk_image(itk_image, dtype=th.float32, device='cpu'
 """
     Create an image pyramide  
 """
-def create_image_pyramide(image, down_sample_factor):
+def create_image_pyramid(image, down_sample_factor):
 
     image_dim = len(image.size)
     image_pyramide = []

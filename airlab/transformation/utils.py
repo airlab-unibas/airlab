@@ -107,7 +107,7 @@ def warp_image(image, displacement):
 """
     Convert displacement to a unit displacement
 """
-def displacement_to_unit_displacement(displacement, pixel_spacing):
+def displacement_to_unit_displacement(displacement):
     # scale displacements from image
     # domain to 2square
     # - last dimension are displacements
@@ -119,7 +119,7 @@ def displacement_to_unit_displacement(displacement, pixel_spacing):
 """
     Convert a unit displacement to a  itk like displacement
 """
-def unit_displacement_to_dispalcement(displacement, pixel_spacing):
+def unit_displacement_to_dispalcement(displacement):
     # scale displacements from 2square
     # domain to image domain
     # - last dimension are displacements

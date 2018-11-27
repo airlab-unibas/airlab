@@ -49,15 +49,15 @@ def main():
     moving_image = al.create_tensor_image_from_itk_image(itkImg, dtype=dtype, device=device)
 
     # create image pyramide size/4, size/2, size/1
-    fixed_image_pyramide = al.create_image_pyramide(fixed_image, [[4, 4], [2, 2]])
-    moving_image_pyramide = al.create_image_pyramide(moving_image, [[4, 4], [2, 2]])
+    fixed_image_pyramid = al.create_image_pyramid(fixed_image, [[4, 4], [2, 2]])
+    moving_image_pyramid = al.create_image_pyramid(moving_image, [[4, 4], [2, 2]])
 
     constant_displacement = None
     regularisation_weight = [1, 5, 50]
     number_of_iterations = [500, 500, 500]
     sigma = [[11, 11], [11, 11], [3, 3]]
 
-    for level, (mov_im_level, fix_im_level) in enumerate(zip(moving_image_pyramide, fixed_image_pyramide)):
+    for level, (mov_im_level, fix_im_level) in enumerate(zip(moving_image_pyramid, fixed_image_pyramid)):
 
         registration = al.PairwiseRegistration(dtype=dtype, device=device)
 
