@@ -14,6 +14,7 @@
 
 import numpy as np
 import torch as th
+import multiprocessing as mp
 import SimpleITK as sitk
 from .image import Image
 
@@ -154,6 +155,7 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     resampler.SetOutputOrigin(origin)
     resampler.SetDefaultPixelValue(minimum_value)
     resampler.SetInterpolator(interpolator)
+    resampler.SetNumberOfThreads(mp.cpu_count())
 
     # resample fixed and moving image
     f_image = Image(resampler.Execute(fixed_image.itk()))

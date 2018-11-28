@@ -1,3 +1,19 @@
+# -*- coding: latin-1 -*-
+
+# Copyright 2018 University of Basel, Center for medical Image Analysis and Navigation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import tempfile
 import shutil
 import os
@@ -40,7 +56,8 @@ class ImageLoader(object):
         for i in self._links:
             print(i)
             for j in self._links[i]:
-                print("\t"+str(j))
+                if not str(j)=="copyright":
+                    print("\t"+str(j))
 
     def load(self, name, image, dtype=th.float32, device='cpu'):
         identifier = name +"_"+ image
@@ -134,9 +151,10 @@ class ImageLoader(object):
                 }
                 )
             data["4DCT_P" + str(i)]["copyright"] = """
-    Data has been provided by the LÃ©on BÃ©rard Cancer Center & CREATIS lab, Lyon, France.
-    The data is described in: 
-            
+    Data has been provided by the Léon Bérard Cancer Center & CREATIS lab, Lyon, France.
+    The data is described in:
+    
+    
     J. Vandemeulebroucke, S. Rit, J. Kybic, P. Clarysse, and D. Sarrut. 
     "Spatiotemporal motion estimation for respiratory-correlated imaging of the lungs."
     In Med Phys, 2011, 38(1), 166-178.
