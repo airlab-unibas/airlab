@@ -19,17 +19,54 @@ import torch as th
 
 from .image import Image
 
-def AutoCropImageFilter(image):
 
-    vals = (image.squeeze()>0).argmax(dim=0).nonzero()
-    xmin = vals[:, 0].min(dim=0)
-    xmax = vals[:, 0].max(dim=0)
-    ymin = vals[:, 1].min(dim=0)
-    ymax = vals[:, 1].max(dim=0)
+def AutoCropImageFilter(image, boundary_value=0):
+    """
+    Performs an auto cropping of values on boundary
+    image (Image): image which has to be cropped
+    boundary_value (float|int): specifies the boundary value which will be cropped
+    return (Image): a new image with cropped boundary
+    """
+    msk = 1 - (image.image.squeeze() == boundary_value)
 
-    pass
+    rminmax = []
+
+    for d in range(len(msk.shape)):
+        region = msk.argmax(dim=d).nonzero()
+        rminmax.append((region.min(dim=0)[0], region.max(dim=0)[0]))
+        #print(rminmax[-1])
+
+    if image.ndim == 2:
+        cropped = image.image.squeeze()[rminmax[1][0]:rminmax[1][1], rminmax[0][0]:rminmax[0][1]]
+        origin = image.origin + th.Tensor(image.spacing) * th.Tensor([rminmax[1][0], rminmax[0][0]])
+    elif image.ndim == 3:
+        cropped = image.image.squeeze()[rminmax[1][0][0]:rminmax[1][1][0], \
+                                        rminmax[0][0][0]:rminmax[0][1][0], \
+                                        rminmax[0][0][1]:rminmax[0][1][1]]
+        #print(cropped.shape)
+        origin = th.Tensor(image.origin) + th.Tensor(image.spacing) * th.Tensor([rminmax[1][0][0], rminmax[0][0][0],rminmax[0][0][1]])
+    else:
+        raise Exception("Only 2 and 3 space dimensions supported")
+
+    size = tuple(cropped.shape)
+    cropped.unsqueeze_(0).unsqueeze_(0)
+
+    return Image(cropped, size, image.spacing, origin.tolist())
+
+
 
 def RemoveBedFilter(image, cropping=True):
+    """
+    Removes fine structures from the image using morphological operators. It can be used to remove the bed structure
+    usually present in CT images. The resulting image and the respective body mask can be cropped with the cropping
+    option.
+
+    Note: the morphological operations are performed on a downsampled version of the image
+
+    image (Image): image of interest
+    cropping (bool): specifies if the image should be cropped after bed removal
+    return (Image, Image): bed-free image and a body mask
+    """
 
     # define parameters
     houndsfield_min = -300
@@ -55,7 +92,7 @@ def RemoveBedFilter(image, cropping=True):
     resampler.SetInterpolator(2) # linear interpolation
     resampler.SetNumberOfThreads(mp.cpu_count())
 
-    image_small = resampler.Execute(image_itk)
+    image_tmp = resampler.Execute(image_itk)
 
 
     # threshold image
@@ -66,7 +103,7 @@ def RemoveBedFilter(image, cropping=True):
     thresholder.SetUpperThreshold(houndsfield_max)
     thresholder.SetNumberOfThreads(mp.cpu_count())
 
-    image_thresh = thresholder.Execute(image_small)
+    image_tmp = thresholder.Execute(image_tmp)
 
 
     # morphological opening with ball as structuring element
@@ -77,12 +114,12 @@ def RemoveBedFilter(image, cropping=True):
     opening.SetForegroundValue(1)
     opening.SetNumberOfThreads(mp.cpu_count())
 
-    image_opened = opening.Execute(image_thresh)
+    image_tmp = opening.Execute(image_tmp)
 
 
-    # crop mask and image
+    # crop zero values from mask boundary
     if cropping:
-        image_opened = AutoCropImageFilter(Image(image_opened)).itk()
+        image_tmp = AutoCropImageFilter(Image(image_tmp)).itk()
 
 
     # morphological closing with ball as structuring element
@@ -93,18 +130,23 @@ def RemoveBedFilter(image, cropping=True):
     closing.SetForegroundValue(1)
     closing.SetNumberOfThreads(mp.cpu_count())
 
-    image_closed = closing.Execute(image_opened)
+    image_tmp = closing.Execute(image_tmp)
 
 
-    # resample mask to original size
+    # resample mask to original spacing
+    mask_size = np.array(np.array(image_tmp.GetSpacing(), dtype=float)*np.array(image_tmp.GetSize(),dtype=float)/np.array(image.spacing, dtype=float), dtype=int).tolist()
     resampler = sitk.ResampleImageFilter()
-    resampler.SetOutputOrigin(image.origin)
-    resampler.SetSize(image.size)
+    resampler.SetOutputOrigin(image_tmp.GetOrigin())
+    resampler.SetSize(mask_size)
     resampler.SetOutputSpacing(image.spacing)
     resampler.SetInterpolator(1) # nearest neighbor interpolation
     resampler.SetNumberOfThreads(mp.cpu_count())
 
-    bodyMask = resampler.Execute(image_closed)
+    bodyMask = resampler.Execute(image_tmp)
+
+    # resample also original image
+    resampler.SetInterpolator(2)
+    image_itk = resampler.Execute(image_itk)
 
 
     # mask image with found label map

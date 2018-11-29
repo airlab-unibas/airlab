@@ -68,7 +68,7 @@ class Image:
         self.ndim = len(self.image.squeeze().shape) # take only non-empty dimensions to count space dimensions
 
 
-    def initializeForImages(self, sitk_image, dtype=th.float32, device='cpu'):
+    def initializeForImages(self, sitk_image, dtype=None, device='cpu'):
         """
         Constructor for SimpleITK image
 
@@ -84,7 +84,12 @@ class Image:
             self.size = sitk_image.GetSize()
             self.spacing = sitk_image.GetSpacing()
             self.origin = sitk_image.GetOrigin()
-            self.to(dtype, device)
+
+            if not dtype is None:
+                self.to(dtype, device)
+            else:
+                self.to(self.image.dtype, device)
+
             self.ndim = len(self.image.squeeze().shape)
 
             self._reverse_axis()
