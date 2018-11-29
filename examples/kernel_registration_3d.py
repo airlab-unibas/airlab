@@ -13,14 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import SimpleITK as sitk
+import os, sys, time
+import multiprocessing as mp
+os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = str(mp.cpu_count())
+
 import torch as th
-
-import matplotlib.pyplot as plt
-import time
-
-import sys
-import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -39,32 +36,46 @@ def main():
     # Here, the GPU with the index 0 is used.
     device = th.device("cuda:0")
 
-    # load the image data and normalize intensities to [0, 1]
-    loader = al.ImageLoader("/tmp/")
+    # directory to store results
+    tmp_directory = "/tmp/"
 
-    fixed_image = loader.load("4DCT_P1", "image_00").to(dtype, device)
+    # load the image data and normalize intensities to [0, 1]
+    loader = al.ImageLoader(tmp_directory)
+
+    print("loading images")
+    fixed_image = loader.load("4DCT_POPI_1", "image_00").to(dtype, device)
+    moving_image = loader.load("4DCT_POPI_5", "image_00").to(dtype, device)
+
+    print("preprocessing images")
+    (fixed_image, fixed_body_mask) = al.RemoveBedFilter(fixed_image)
     fixed_image.image -= fixed_image.image.min()
     fixed_image.image /= fixed_image.image.max()
 
-    moving_image = loader.load("4DCT_P5", "image_00").to(dtype, device)
+    (moving_image, moving_body_mask) = al.RemoveBedFilter(moving_image)
     moving_image.image -= moving_image.image.min()
     moving_image.image /= moving_image.image.max()
 
+
     f_image, f_mask, m_image, m_mask = al.get_joint_domain_images(fixed_image, moving_image, cm_alignment=True, compute_masks=True)
 
-    # create image pyramid size/4, size/2, size/1
-    fixed_image_pyramid = al.create_image_pyramid(f_image, [[4, 4, 4], [2, 2, 2]])
-    fixed_mask_pyramid = al.create_image_pyramid(f_mask, [[4, 4, 4], [2, 2, 2]])
-    moving_image_pyramid = al.create_image_pyramid(m_image, [[4, 4, 4], [2, 2, 2]])
-    moving_mask_pyramid = al.create_image_pyramid(m_mask, [[4, 4, 4], [2, 2, 2]])
+
+    # create image pyramid size/8 size/4, size/2, size/1
+    fixed_image_pyramid = al.create_image_pyramid(f_image, [[8, 8, 8], [4, 4, 4], [2, 2, 2]])
+    fixed_mask_pyramid = al.create_image_pyramid(f_mask, [[8, 8, 8], [4, 4, 4], [2, 2, 2]])
+    moving_image_pyramid = al.create_image_pyramid(m_image, [[8, 8, 8], [4, 4, 4], [2, 2, 2]])
+    moving_mask_pyramid = al.create_image_pyramid(m_mask, [[8, 8, 8], [4, 4, 4], [2, 2, 2]])
+
 
     constant_displacement = None
-    regularisation_weight = [1, 5, 50]
-    number_of_iterations = [300, 200, 100]
-    sigma = [[11, 11, 11], [9, 9, 9], [3, 3, 3]]
+    regularisation_weight = [1, 10, 100, 1000]
+    number_of_iterations = [300, 200, 100, 50]
+    sigma = [[11, 11, 11], [11, 11, 11], [9, 9, 9], [9, 9, 9]]
 
+    print("perform registration")
     for level, (mov_im_level, mov_msk_level, fix_im_level, fix_msk_level) in enumerate(zip(moving_image_pyramid, moving_mask_pyramid, fixed_image_pyramid, fixed_mask_pyramid)):
 
+
+        print("---- Level "+str(level)+" ----")
         registration = al.PairwiseRegistration(dtype=dtype, device=device)
 
         # define the transformation
@@ -102,7 +113,9 @@ def main():
 
         registration.start()
 
+        # store current displacement field
         constant_displacement = transformation.get_displacement()
+
 
     # create final result
     displacement = transformation.get_displacement()
@@ -112,17 +125,20 @@ def main():
 
     end = time.time()
 
-    print("=================================================================")
-
-    print("Registration done in: ", end - start, " seconds")
 
     # write result images
+    print("writing results")
     warped_image.write('/tmp/bspline_warped_image.vtk')
     m_image.write('/tmp/bspline_moving_image.vtk')
     m_mask.write('/tmp/bspline_moving_mask.vtk')
     f_image.write('/tmp/bspline_fixed_image.vtk')
     f_mask.write('/tmp/bspline_fixed_mask.vtk')
     displacement.write('/tmp/bspline_displacement_image.vtk')
+
+
+    print("=================================================================")
+    print("Registration done in: ", end - start, " seconds")
+
 
 
 

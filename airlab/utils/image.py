@@ -97,11 +97,14 @@ class Image:
             raise Exception("A SimpleITK image was expected as argument. Got "+str(type(sitk_image)))
 
 
-    def to(self, dtype=th.float32, device='cpu'):
+    def to(self, dtype=None, device='cpu'):
         """
         Converts the image tensor to a specified dtype and moves it to the specified device
         """
-        self.image = self.image.to(dtype=dtype, device=device)
+        if not dtype is None:
+            self.image = self.image.to(dtype=dtype, device=device)
+        else:
+            self.image = self.image.to(device=device)
         self.dtype = self.image.dtype
         self.device = self.image.device
 

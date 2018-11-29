@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import SimpleITK as sitk
+import os
 import multiprocessing as mp
+os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = str(mp.cpu_count())
+
+import SimpleITK as sitk
 import numpy as np
 import torch as th
 
@@ -119,7 +122,7 @@ def RemoveBedFilter(image, cropping=True):
 
     # crop zero values from mask boundary
     if cropping:
-        image_tmp = AutoCropImageFilter(Image(image_tmp)).itk()
+        image_tmp = AutoCropImageFilter(Image(image_tmp).to(device=image.device)).itk()
 
 
     # morphological closing with ball as structuring element
@@ -157,4 +160,4 @@ def RemoveBedFilter(image, cropping=True):
 
     outImage = masking.Execute(image_itk, bodyMask)
 
-    return (Image(outImage), Image(bodyMask))
+    return (Image(outImage).to(device=image.device), Image(bodyMask).to(device=image.device))

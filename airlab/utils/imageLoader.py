@@ -64,10 +64,10 @@ class ImageLoader(object):
         if not identifier in self._database:
 
             if not name in self._links:
-                raise "Image not found in link database: " + name
+                raise Exception("Image not found in link database: " + name)
 
             if not image in self._links[name]:
-                raise "Image not found in image links: " + name + "/" + image
+                raise Exception("Image not found in image links: " + name + "/" + image)
 
 
             filename = os.path.join(self._tmpdir, identifier+".mha")
@@ -136,29 +136,36 @@ class ImageLoader(object):
 
     @staticmethod
     def generate_database():
+
+        # Adding DIR Validation Data to the database
         tags = ["bl", "ng", "dx", "gt", "mm2", "bh"]
+        prefix = "4DCT_POPI_"
 
         data = {}
         for i in range(len(tags)):
-            data["4DCT_P"+str(i)] = {}
+            data[prefix+str(i)] = {}
             for j in range(10):
-                data["4DCT_P" + str(i)]["image_" + str(j) + "0"] = []
-                data["4DCT_P" + str(i)]["image_" + str(j) + "0"].append(
+                data[prefix + str(i)]["image_" + str(j) + "0"] = []
+                data[prefix + str(i)]["image_" + str(j) + "0"].append(
                 {
                   "link_mhd": "https://www.creatis.insa-lyon.fr/~srit/POPI/MedPhys11/"+tags[i]+"/mhd/"+str(j)+"0.mhd",
                   "link_raw": "https://www.creatis.insa-lyon.fr/~srit/POPI/MedPhys11/"+tags[i]+"/mhd/"+str(j)+"0.raw",
                   "link_pts": "https://www.creatis.insa-lyon.fr/~srit/POPI/MedPhys11/"+tags[i]+"/pts/"+str(j)+"0.pts"
                 }
                 )
-            data["4DCT_P" + str(i)]["copyright"] = """
+            data[prefix + str(i)]["copyright"] = """
     Data has been provided by the Léon Bérard Cancer Center & CREATIS lab, Lyon, France.
     The data is described in:
-    
     
     J. Vandemeulebroucke, S. Rit, J. Kybic, P. Clarysse, and D. Sarrut. 
     "Spatiotemporal motion estimation for respiratory-correlated imaging of the lungs."
     In Med Phys, 2011, 38(1), 166-178.
+    
+    This data can be used for research only. If you use this data for your research, 
+    please acknowledge the originators appropriately!
     """
+
+
 
         return data
 
