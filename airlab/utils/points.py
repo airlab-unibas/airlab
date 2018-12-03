@@ -13,7 +13,10 @@
 # limitations under the License.
 
 import numpy as np
+import torch as th
 import SimpleITK as sitk
+
+from .image import Displacement
 
 class Points:
     """
@@ -85,10 +88,36 @@ class Points:
     @staticmethod
     def transform(points, displacement):
         """
+        Transforms a set of points with a displacement field
 
         points (array): array of points
-        displacement (Displacement): displacement field to transform points
+        displacement (SimpleITK.Image | Displacement ): displacement field to transform points
         return (array): transformed points
         """
+        if type(displacement) == sitk.SimpleITK.Image:
+            df_transform = sitk.DisplacementFieldTransform(displacement)
+        elif type(displacement) == Displacement:
+            df_transform = sitk.DisplacementFieldTransform(displacement.to(dtype=th.float64).itk())
+        else:
+            raise Exception("Datatype of displacement field not supported.")
 
-        pass
+        df_transform.SetSmoothingOff()
+
+        transformed_points = np.zeros_like(points)
+        for i in range(points.shape[0]):
+            transformed_points[i, :] = df_transform.TransformPoint(points[i, :])
+
+        return transformed_points
+
+    @staticmethod
+    def TRE(points1, points2):
+        """
+        Computes the average distance between points in points1 and points2
+
+        Note: if there is a different amount of points in the two sets, only the first points are compared
+        points1 (array): point set 1
+        points2 (array): point set 2
+        return (float): mean difference
+        """
+        n = min(points1.shape[0], points2.shape[0])
+        return np.mean(np.linalg.norm(points1[:n,:]-points2[:n,:], axis=1))

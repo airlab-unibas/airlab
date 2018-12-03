@@ -112,9 +112,12 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     f_mask = None
     m_mask = None
 
+    cm_displacement = None
+
     # align images using center of mass
     if cm_alignment:
-        moving_image.origin = moving_image.origin - get_center_of_mass(moving_image) + get_center_of_mass(fixed_image)
+        cm_displacement = get_center_of_mass(fixed_image) - get_center_of_mass(moving_image)
+        moving_image.origin = moving_image.origin + cm_displacement
 
     # check if domains are equal, as then nothing has to be resampled
     if np.all(fixed_image.origin == moving_image.origin) and\
@@ -179,6 +182,6 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
         f_image.image[f_image.image == minimum_value] = default_value
         m_image.image[m_image.image == minimum_value] = default_value
 
-    return f_image, f_mask, m_image, m_mask
+    return f_image, f_mask, m_image, m_mask, cm_displacement
 
 

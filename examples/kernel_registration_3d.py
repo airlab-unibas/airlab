@@ -14,10 +14,8 @@
 # limitations under the License.
 
 import os, sys, time
-import multiprocessing as mp
-os.environ["ITK_GLOBAL_DEFAULT_NUMBER_OF_THREADS"] = str(mp.cpu_count())
-
 import torch as th
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -42,22 +40,46 @@ def main():
     # load the image data and normalize intensities to [0, 1]
     loader = al.ImageLoader(tmp_directory)
 
+
+    # Images:
+    p1_name = "4DCT_POPI_1"
+    p1_img_nr = "image_00"
+    p2_name = "4DCT_POPI_1"
+    p2_img_nr = "image_50"
+
     print("loading images")
-    fixed_image = loader.load("4DCT_POPI_1", "image_00").to(dtype, device)
-    moving_image = loader.load("4DCT_POPI_5", "image_00").to(dtype, device)
+    (fixed_image, fixed_points) = loader.load(p1_name, p1_img_nr)
+    (moving_image, moving_points) = loader.load(p2_name, p2_img_nr)
+    fixed_image.to(dtype, device)
+    moving_image.to(dtype, device)
+
+    initial_tre = al.Points.TRE(fixed_points, moving_points)
+    print("initial TRE: "+str(initial_tre))
 
     print("preprocessing images")
-    (fixed_image, fixed_body_mask) = al.RemoveBedFilter(fixed_image)
-    fixed_image.image -= fixed_image.image.min()
-    fixed_image.image /= fixed_image.image.max()
+    (fixed_image, fixed_body_mask) = al.remove_bed_filter(fixed_image)
+    (moving_image, moving_body_mask) = al.remove_bed_filter(moving_image)
 
-    (moving_image, moving_body_mask) = al.RemoveBedFilter(moving_image)
-    moving_image.image -= moving_image.image.min()
-    moving_image.image /= moving_image.image.max()
+    # normalize image intensities using common minimum and common maximum
+    fixed_image, moving_image = al.utils.normalize_images(fixed_image, moving_image)
 
 
-    f_image, f_mask, m_image, m_mask = al.get_joint_domain_images(fixed_image, moving_image, cm_alignment=True, compute_masks=True)
+    # Remove bed and auto-crop images
+    if p1_name == p2_name:
+        cm_alignment = False
+    else:
+        cm_alignment = True
+    f_image, f_mask, m_image, m_mask, cm_displacement = al.get_joint_domain_images(fixed_image, moving_image, cm_alignment=cm_alignment, compute_masks=True)
 
+
+    # align also moving points
+    if not cm_displacement is None:
+        moving_points_aligned = np.zeros_like(moving_points)
+        for i in range(moving_points_aligned.shape[0]):
+            moving_points_aligned[i, :] = moving_points[i, :] + cm_displacement
+        print("aligned TRE: " + str(al.Points.TRE(fixed_points, moving_points_aligned)))
+    else:
+        moving_points_aligned = moving_points
 
     # create image pyramid size/8 size/4, size/2, size/1
     fixed_image_pyramid = al.create_image_pyramid(f_image, [[8, 8, 8], [4, 4, 4], [2, 2, 2]])
@@ -69,7 +91,9 @@ def main():
     constant_displacement = None
     regularisation_weight = [1, 10, 100, 1000]
     number_of_iterations = [300, 200, 100, 50]
-    sigma = [[11, 11, 11], [11, 11, 11], [9, 9, 9], [9, 9, 9]]
+    sigma = [[7, 7, 7], [7, 7, 7], [5, 5, 5], [5, 5, 5]]
+    step_size = [1e-2, 5e-3, 1e-3, 1e-3]
+
 
     print("perform registration")
     for level, (mov_im_level, mov_msk_level, fix_im_level, fix_msk_level) in enumerate(zip(moving_image_pyramid, moving_mask_pyramid, fixed_image_pyramid, fixed_mask_pyramid)):
@@ -106,7 +130,7 @@ def main():
         registration.set_regulariser_displacement([regulariser])
 
         #define the optimizer
-        optimizer = th.optim.Adam(transformation.parameters())
+        optimizer = th.optim.Adam(transformation.parameters(), lr=step_size[level], amsgrad=True)
 
         registration.set_optimizer(optimizer)
         registration.set_number_of_iterations(number_of_iterations[level])
@@ -115,6 +139,16 @@ def main():
 
         # store current displacement field
         constant_displacement = transformation.get_displacement()
+
+        # generate SimpleITK displacement field and calculate TRE
+        tmp_displacement = al.transformation.utils.upsample_displacement(constant_displacement.clone().to(device='cpu'),
+                                                                         m_image.size, interpolation="linear")
+        tmp_displacement = al.transformation.utils.unit_displacement_to_dispalcement(tmp_displacement)  # unit measures to image domain measures
+        tmp_displacement = al.create_displacement_image_from_image(tmp_displacement, m_image)
+        tmp_displacement.write('/tmp/bspline_displacement_image_level_'+str(level)+'.vtk')
+
+        # in order to not invert the displacement field, the fixed points are transformed to match the moving points
+        print("TRE on that level: "+str(al.Points.TRE(moving_points_aligned, al.Points.transform(fixed_points, tmp_displacement))))
 
 
     # create final result
@@ -125,6 +159,11 @@ def main():
 
     end = time.time()
 
+    # in order to not invert the displacement field, the fixed points are transformed to match the moving points
+    print("Initial TRE: "+str(initial_tre))
+    fixed_points_transformed = al.Points.transform(fixed_points, displacement)
+    print("Final TRE: " + str(al.Points.TRE(moving_points_aligned, fixed_points_transformed)))
+
 
     # write result images
     print("writing results")
@@ -134,6 +173,9 @@ def main():
     f_image.write('/tmp/bspline_fixed_image.vtk')
     f_mask.write('/tmp/bspline_fixed_mask.vtk')
     displacement.write('/tmp/bspline_displacement_image.vtk')
+    al.Points.write('/tmp/bspline_fixed_points_transformed.vtk', fixed_points_transformed)
+    al.Points.write('/tmp/bspline_moving_points_aligned.vtk', moving_points_aligned)
+
 
 
     print("=================================================================")

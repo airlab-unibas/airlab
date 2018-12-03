@@ -29,7 +29,7 @@ from .domain import compute_coordinate_grid_2d, compute_coordinate_grid_3d, get_
 
 from .imageLoader import ImageLoader
 
-from .imageFilters import AutoCropImageFilter, RemoveBedFilter
+from .imageFilters import auto_crop_image_filter, normalize_images, remove_bed_filter
 
 
 __all__ = ['Image', 'Displacement', 'read_image_as_tensor', 'create_image_from_image', 'image_from_numpy',\
@@ -39,4 +39,4 @@ __all__ = ['Image', 'Displacement', 'read_image_as_tensor', 'create_image_from_i
            'wendland_kernel_1d', 'wendland_kernel_2d', 'wendland_kernel_3d', 'wendland_kernel',\
            'bspline_kernel_1d', 'bspline_kernel_2d', 'bspline_kernel_3d', 'bspline_kernel',\
            'compute_coordinate_grid_2d', 'compute_coordinate_grid_3d', 'get_center_of_mass', 'get_joint_domain_images',\
-           'ImageLoader', 'AutoCropImageFilter', 'RemoveBedFilter']
+           'ImageLoader', 'auto_crop_image_filter', 'remove_bed_filter']

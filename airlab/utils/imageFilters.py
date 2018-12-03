@@ -23,7 +23,7 @@ import torch as th
 from .image import Image
 
 
-def AutoCropImageFilter(image, boundary_value=0):
+def auto_crop_image_filter(image, boundary_value=0):
     """
     Performs an auto cropping of values on boundary
     image (Image): image which has to be cropped
@@ -57,8 +57,35 @@ def AutoCropImageFilter(image, boundary_value=0):
     return Image(cropped, size, image.spacing, origin.tolist())
 
 
+def normalize_images(fixed_image, moving_image):
+    """
+    Noramlize image intensities by extracting joint minimum and dividing by joint maximum
 
-def RemoveBedFilter(image, cropping=True):
+    Note: the function is inplace
+
+    fixed_image (Image): fixed image
+    moving_image (Image): moving image
+    return (Image, Image): normalized images
+    """
+    fixed_max = fixed_image.image.max()
+    fixed_min = fixed_image.image.min()
+    moving_max = moving_image.image.max()
+    moving_min = moving_image.image.min()
+
+    max_val = max(fixed_max, moving_max)
+    min_min = min(fixed_min, moving_min)
+
+    fixed_image.image -= min_val
+    fixed_image.image /= max_val
+
+    moving_image.image -= min_val
+    moving_image.image /= max_val
+
+    return (fixed_image, moving_image)
+
+
+
+def remove_bed_filter(image, cropping=True):
     """
     Removes fine structures from the image using morphological operators. It can be used to remove the bed structure
     usually present in CT images. The resulting image and the respective body mask can be cropped with the cropping
@@ -122,7 +149,7 @@ def RemoveBedFilter(image, cropping=True):
 
     # crop zero values from mask boundary
     if cropping:
-        image_tmp = AutoCropImageFilter(Image(image_tmp).to(device=image.device)).itk()
+        image_tmp = auto_crop_image_filter(Image(image_tmp).to(device=image.device)).itk()
 
 
     # morphological closing with ball as structuring element

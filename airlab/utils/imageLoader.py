@@ -22,6 +22,7 @@ import urllib.request
 import torch as th
 
 from .image import Image
+from .points import Points
 
 class ImageLoader(object):
 
@@ -70,17 +71,17 @@ class ImageLoader(object):
                 raise Exception("Image not found in image links: " + name + "/" + image)
 
 
-            filename = os.path.join(self._tmpdir, identifier+".mha")
+            image_filename = os.path.join(self._tmpdir, identifier+".mha")
+            points_filename = os.path.join(self._tmpdir, identifier + ".pts")
             data = None
             copyright = self._links[name]["copyright"]
 
             # check if file is already available in tmp
-            if os.path.isfile(filename):
-                data = Image.read(filename, dtype, device)
+            if os.path.isfile(image_filename):
+                data = Image.read(image_filename, dtype, device)
             else:
                 link_mhd = self._links[name][image][0]["link_mhd"]
                 link_raw = self._links[name][image][0]["link_raw"]
-                link_pts = self._links[name][image][0]["link_pts"]
 
                 print("-------------------------------------------------------")
                 print("Downloading: "+link_mhd)
@@ -89,7 +90,6 @@ class ImageLoader(object):
 
                 urllib.request.urlretrieve(link_mhd, os.path.join(self._tmpdir, "download.mhd"))
                 urllib.request.urlretrieve(link_raw, os.path.join(self._tmpdir, "download.raw"))
-                urllib.request.urlretrieve(link_pts, os.path.join(self._tmpdir, "download.pts"))
 
                 with open(os.path.join(self._tmpdir, "download.mhd"), 'r') as file:
                     lines = file.readlines()
@@ -100,10 +100,23 @@ class ImageLoader(object):
                     file.write("".join(lines))
 
                 data = Image.read(os.path.join(self._tmpdir, "download.mhd"))
-                data.write(filename)
+                data.write(image_filename)
 
-            item = ImageLoader.DataItem(identifier, filename, copyright)
-            item.data = data
+
+            points = None
+            if os.path.isfile(points_filename):
+                points = Points.read(points_filename)
+            else:
+                link_pts = self._links[name][image][0]["link_pts"]
+                try:
+                    urllib.request.urlretrieve(link_pts, os.path.join(self._tmpdir, "download.pts"))
+                    points = Points.read(os.path.join(self._tmpdir, "download.pts"))
+                    Points.write(points_filename, points)
+                except:
+                    print("Warning: for subject "+name+"a and image "+image+" no points are defined.")
+
+            item = ImageLoader.DataItem(identifier, image_filename, copyright)
+            item.data = (data, points)
 
             self._database[identifier] = item
 
