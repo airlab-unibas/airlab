@@ -171,7 +171,7 @@ def main():
     end = time.time()
 
     # in order to not invert the displacement field, the fixed points are transformed to match the moving points
-    if using_landmarks
+    if using_landmarks:
         print("Initial TRE: "+str(initial_tre))
         fixed_points_transformed = al.Points.transform(fixed_points, displacement)
         print("Final TRE: " + str(al.Points.TRE(moving_points_aligned, fixed_points_transformed)))
