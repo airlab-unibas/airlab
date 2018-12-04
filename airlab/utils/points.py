@@ -20,16 +20,20 @@ from .image import Displacement
 
 class Points:
     """
-        Class read and write points
+        Class implementing functionality for dealing with points:
+
+        - read/write: supported formats are pts and vtk (polydata)
+        - transform: transform the points given a displacement field
+        - TRE: calculates the target registration error between two point sets
     """
     @staticmethod
     def read(filename):
         """
         Read points from file. Following formats are supported:
 
-        - pts:
+        - pts: each point is represended in one line where the coordinates are separated with a tab
 
-        - vtk:
+        - vtk: the vtk polydata is supported as well
 
         filename (str): filename
         return (array): two dimensional array
@@ -45,8 +49,7 @@ class Points:
         elif filename.endswith("vtk"):
             with open(filename) as f:
                 lines = f.readlines()
-                if not lines[0] == "# vtk DataFile Version 3.0\n" and\
-                    not lines[1] == "vtk output\n" and \
+                if not lines[1] == "vtk output\n" and \
                     not lines[2] == "ASCII\n" and \
                     not lines[3] == "DATASET POLYDATA\n":
                     raise Exception("Tried to read corrupted vtk polydata file")
@@ -115,6 +118,7 @@ class Points:
         Computes the average distance between points in points1 and points2
 
         Note: if there is a different amount of points in the two sets, only the first points are compared
+
         points1 (array): point set 1
         points2 (array): point set 2
         return (float): mean difference

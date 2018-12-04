@@ -98,10 +98,10 @@ def main():
 
 
     constant_displacement = None
-    regularisation_weight = [1e-1, 1e-1, 1e-0, 1e+1]
+    regularisation_weight = [1e-2, 1e-1, 1e-0, 1e+2]
     number_of_iterations = [300, 200, 100, 50]
-    sigma = [[7, 7, 7], [7, 7, 7], [7, 7, 7], [7, 7, 7]]
-    step_size = [1e-2, 5e-3, 1e-3, 1e-3]
+    sigma = [[9, 9, 9], [9, 9, 9], [9, 9, 9], [9, 9, 9]]
+    step_size = [1e-2, 4e-3, 2e-3, 2e-3]
 
 
     print("perform registration")
