@@ -174,8 +174,8 @@ class NCC(_PairwiseImageLoss):
         fixed_image_valid = th.masked_select(self._fixed_image.image, mask)
 
 
-        value = -1.*th.sum((fixed_image_valid - th.mean(moving_image_valid))*(moving_image_valid - th.mean(moving_image_valid)))\
-                /th.sqrt(th.sum((fixed_image_valid - th.mean(moving_image_valid))**2)*th.sum((moving_image_valid - th.mean(moving_image_valid))**2) + 1e-10)
+        value = -1.*th.sum((fixed_image_valid - th.mean(fixed_image_valid))*(moving_image_valid - th.mean(moving_image_valid)))\
+                /th.sqrt(th.sum((fixed_image_valid - th.mean(fixed_image_valid))**2)*th.sum((moving_image_valid - th.mean(moving_image_valid))**2) + 1e-10)
 
         return value
 
