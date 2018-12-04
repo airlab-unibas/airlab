@@ -88,8 +88,12 @@ class ImageLoader(object):
                 print("\nCopyright notice for " + identifier)
                 print(copyright)
 
-                urllib.request.urlretrieve(link_mhd, os.path.join(self._tmpdir, "download.mhd"))
-                urllib.request.urlretrieve(link_raw, os.path.join(self._tmpdir, "download.raw"))
+                try:
+                    urllib.request.urlretrieve(link_mhd, os.path.join(self._tmpdir, "download.mhd"))
+                    urllib.request.urlretrieve(link_raw, os.path.join(self._tmpdir, "download.raw"))
+                except:
+                    print("Could not download the image")
+                    raise
 
                 with open(os.path.join(self._tmpdir, "download.mhd"), 'r') as file:
                     lines = file.readlines()
@@ -113,7 +117,7 @@ class ImageLoader(object):
                     points = Points.read(os.path.join(self._tmpdir, "download.pts"))
                     Points.write(points_filename, points)
                 except:
-                    print("Warning: for subject "+name+"a and image "+image+" no points are defined.")
+                    print("Warning: for subject "+name+" and image "+image+" no points are defined.")
 
             item = ImageLoader.DataItem(identifier, image_filename, copyright)
             item.data = (data, points)

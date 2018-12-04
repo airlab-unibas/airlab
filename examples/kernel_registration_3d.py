@@ -47,14 +47,21 @@ def main():
     p2_name = "4DCT_POPI_1"
     p2_img_nr = "image_50"
 
+    using_landmarks = True
+
     print("loading images")
     (fixed_image, fixed_points) = loader.load(p1_name, p1_img_nr)
     (moving_image, moving_points) = loader.load(p2_name, p2_img_nr)
     fixed_image.to(dtype, device)
     moving_image.to(dtype, device)
 
-    initial_tre = al.Points.TRE(fixed_points, moving_points)
-    print("initial TRE: "+str(initial_tre))
+    if fixed_points is None or moving_points is None:
+        using_landmarks = False
+
+    if using_landmarks:
+        initial_tre = al.Points.TRE(fixed_points, moving_points)
+        print("initial TRE: "+str(initial_tre))
+
 
     print("preprocessing images")
     (fixed_image, fixed_body_mask) = al.remove_bed_filter(fixed_image)
@@ -64,11 +71,13 @@ def main():
     fixed_image, moving_image = al.utils.normalize_images(fixed_image, moving_image)
 
 
-    # Remove bed and auto-crop images
+    # only perform center of mass alignment if inter subject registration is performed
     if p1_name == p2_name:
         cm_alignment = False
     else:
         cm_alignment = True
+
+    # Remove bed and auto-crop images
     f_image, f_mask, m_image, m_mask, cm_displacement = al.get_joint_domain_images(fixed_image, moving_image, cm_alignment=cm_alignment, compute_masks=True)
 
 
@@ -89,9 +98,9 @@ def main():
 
 
     constant_displacement = None
-    regularisation_weight = [1, 10, 100, 1000]
+    regularisation_weight = [1e-1, 1e-1, 1e-0, 1e+1]
     number_of_iterations = [300, 200, 100, 50]
-    sigma = [[7, 7, 7], [7, 7, 7], [5, 5, 5], [5, 5, 5]]
+    sigma = [[7, 7, 7], [7, 7, 7], [7, 7, 7], [7, 7, 7]]
     step_size = [1e-2, 5e-3, 1e-3, 1e-3]
 
 
@@ -139,6 +148,7 @@ def main():
 
         # store current displacement field
         constant_displacement = transformation.get_displacement()
+
 
         # generate SimpleITK displacement field and calculate TRE
         tmp_displacement = al.transformation.utils.upsample_displacement(constant_displacement.clone().to(device='cpu'),
