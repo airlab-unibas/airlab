@@ -65,6 +65,7 @@ We released AirLab to contribute to the community. Thus, if you find and/or fix 
 
 We deeply appreciate the help of the following people:
 * Iain Carmichael
+* Benjamin Sugerman
 
 ### Other Open Source Projects
 AirLab depends on several thirdparty open source project which are included as library. For details, consider the NOTICE file.
