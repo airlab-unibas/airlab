@@ -82,7 +82,7 @@ def main():
 
 
     # align also moving points
-    if not cm_displacement is None:
+    if not cm_displacement is None and using_landmarks:
         moving_points_aligned = np.zeros_like(moving_points)
         for i in range(moving_points_aligned.shape[0]):
             moving_points_aligned[i, :] = moving_points[i, :] + cm_displacement
@@ -158,7 +158,8 @@ def main():
         tmp_displacement.write('/tmp/bspline_displacement_image_level_'+str(level)+'.vtk')
 
         # in order to not invert the displacement field, the fixed points are transformed to match the moving points
-        print("TRE on that level: "+str(al.Points.TRE(moving_points_aligned, al.Points.transform(fixed_points, tmp_displacement))))
+        if using_landmarks:
+            print("TRE on that level: "+str(al.Points.TRE(moving_points_aligned, al.Points.transform(fixed_points, tmp_displacement))))
 
 
     # create final result
@@ -170,9 +171,10 @@ def main():
     end = time.time()
 
     # in order to not invert the displacement field, the fixed points are transformed to match the moving points
-    print("Initial TRE: "+str(initial_tre))
-    fixed_points_transformed = al.Points.transform(fixed_points, displacement)
-    print("Final TRE: " + str(al.Points.TRE(moving_points_aligned, fixed_points_transformed)))
+    if using_landmarks
+        print("Initial TRE: "+str(initial_tre))
+        fixed_points_transformed = al.Points.transform(fixed_points, displacement)
+        print("Final TRE: " + str(al.Points.TRE(moving_points_aligned, fixed_points_transformed)))
 
 
     # write result images
@@ -183,8 +185,10 @@ def main():
     f_image.write('/tmp/bspline_fixed_image.vtk')
     f_mask.write('/tmp/bspline_fixed_mask.vtk')
     displacement.write('/tmp/bspline_displacement_image.vtk')
-    al.Points.write('/tmp/bspline_fixed_points_transformed.vtk', fixed_points_transformed)
-    al.Points.write('/tmp/bspline_moving_points_aligned.vtk', moving_points_aligned)
+
+    if using_landmarks:
+        al.Points.write('/tmp/bspline_fixed_points_transformed.vtk', fixed_points_transformed)
+        al.Points.write('/tmp/bspline_moving_points_aligned.vtk', moving_points_aligned)
 
 
 
