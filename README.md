@@ -63,6 +63,8 @@ If you can use this software in any way, please cite us in your publications:
 ### Contributing
 We released AirLab to contribute to the community. Thus, if you find and/or fix bugs or extend the software please contribute as well and let us know or make a pull request. 
 
+We deeply appreciate the help of the following people:
+* Iain Carmichael
 
 ### Other Open Source Projects
 AirLab depends on several thirdparty open source project which are included as library. For details, consider the NOTICE file.
