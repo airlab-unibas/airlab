@@ -59,7 +59,7 @@ def main():
 
     for level, (mov_im_level, fix_im_level) in enumerate(zip(moving_image_pyramid, fixed_image_pyramid)):
 
-        registration = al.PairwiseRegistration(dtype=dtype, device=device)
+        registration = al.PairwiseRegistration(dtype=dtype, device=device, verbose=False)
 
         # define the transformation
         transformation = al.transformation.pairwise.BsplineTransformation(mov_im_level.size,
