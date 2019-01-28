@@ -12,11 +12,12 @@ All notable changes to this project will be documented in this file.
 - Added a Bspline kernel registration example for 3d where all the new features are used
 
 ## [v0.2.0]
-- Reduce number of input parameter for the registration classes
-- Added new non-deformable transformation: similarity and affine transformations 
+- Added new diffeomorphic transformation option for all deformable transformations
 - Added new image loss: Mutual Information
 - Added new image loss: Normalized Gradient Fields
 - Added new image loss: Structural Similarity Image Measure
-- Added new diffeomorphic transformation option for all deformable transformation
+- Reduce number of input parameter for the registration classes
+- Added new non-deformable transformation: similarity and affine transformation including the option for adding the 
+center of mass to the optimization parameters
 - Bugfix verbose flag
 
