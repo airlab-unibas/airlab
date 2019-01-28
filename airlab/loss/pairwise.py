@@ -29,7 +29,7 @@ class _PairwiseImageLoss(th.nn.modules.Module):
         super(_PairwiseImageLoss, self).__init__()
         self._size_average = size_average
         self._reduce = reduce
-        self.name = "parent"
+        self._name = "parent"
 
         self._warped_moving_image = None
         self._warped_moving_mask = None
@@ -52,6 +52,10 @@ class _PairwiseImageLoss(th.nn.modules.Module):
 
         self._dtype = self._moving_image.dtype
         self._device = self._moving_image.device
+
+    @property
+    def name(self):
+        return self._name
 
     def GetWarpedImage(self):
         return self._warped_moving_image[0, 0, ...].detach().cpu()
@@ -114,7 +118,7 @@ class MSE(_PairwiseImageLoss):
     def __init__(self, fixed_image, moving_image, fixed_mask=None, moving_mask=None, size_average=True, reduce=True):
         super(MSE, self).__init__(fixed_image, moving_image, fixed_mask, moving_mask, size_average, reduce)
 
-        self.name = "mse"
+        self._name = "mse"
 
         self.warped_moving_image = None
 
@@ -156,7 +160,7 @@ class NCC(_PairwiseImageLoss):
     def __init__(self, fixed_image, moving_image, fixed_mask=None, moving_mask=None):
         super(NCC, self).__init__(fixed_image, moving_image, fixed_mask, moving_mask, False, False)
 
-        self.name = "ncc"
+        self._name = "ncc"
 
         self.warped_moving_image = th.empty_like(self._moving_image.image, dtype=self._dtype, device=self._device)
 
@@ -187,7 +191,7 @@ class LCC(_PairwiseImageLoss):
     def __init__(self, fixed_image, moving_image,fixed_mask=None, moving_mask=None, sigma=3, kernel_type="box", size_average=True, reduce=True):
         super(LCC, self).__init__(fixed_image, moving_image, fixed_mask, moving_mask,  size_average, reduce)
 
-        self.name = "lcc"
+        self._name = "lcc"
         self.warped_moving_image = th.empty_like(self._moving_image.image, dtype=self._dtype, device=self._device)
         self._kernel = None
 

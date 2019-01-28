@@ -124,8 +124,7 @@ class PairwiseRegistration(_PairwiseRegistration):
 
         return loss
 
-
-    def start(self,EarlyStopping=False,StopPatience=10):
+    def start(self, EarlyStopping=False, StopPatience=10):
 
         if EarlyStopping:
             from copy import deepcopy

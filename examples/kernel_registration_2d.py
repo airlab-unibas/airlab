@@ -52,7 +52,7 @@ def main():
 
     for level, (mov_im_level, fix_im_level) in enumerate(zip(moving_image_pyramid, fixed_image_pyramid)):
 
-        registration = al.PairwiseRegistration(dtype=dtype, device=device, verbose=True)
+        registration = al.PairwiseRegistration(verbose=True)
 
         # define the transformation
         transformation = al.transformation.pairwise.BsplineTransformation(mov_im_level.size,
@@ -60,7 +60,7 @@ def main():
                                                                           order=3,
                                                                           dtype=dtype,
                                                                           device=device,
-                                                                          differmorphic=False)
+                                                                          differmorphic=True)
 
         if level > 0:
             constant_displacement = al.transformation.utils.upsample_displacement(constant_displacement,
@@ -71,7 +71,7 @@ def main():
         registration.set_transformation(transformation)
 
         # choose the Mean Squared Error as image loss
-        image_loss = al.loss.pairwise.MSE(fix_im_level, mov_im_level)
+        image_loss = al.loss.pairwise.SSIM(fix_im_level, mov_im_level)
 
         registration.set_image_loss([image_loss])
 

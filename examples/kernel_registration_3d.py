@@ -114,7 +114,7 @@ def main():
 
 
         print("---- Level "+str(level)+" ----")
-        registration = al.PairwiseRegistration(dtype=dtype, device=device)
+        registration = al.PairwiseRegistration()
 
         # define the transformation
         transformation = al.transformation.pairwise.BsplineTransformation(mov_im_level.size,
