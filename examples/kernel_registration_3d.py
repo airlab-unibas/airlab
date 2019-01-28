@@ -78,7 +78,9 @@ def main():
         cm_alignment = True
 
     # Remove bed and auto-crop images
-    f_image, f_mask, m_image, m_mask, cm_displacement = al.get_joint_domain_images(fixed_image, moving_image, cm_alignment=cm_alignment, compute_masks=True)
+    f_image, f_mask, m_image, m_mask, cm_displacement = al.get_joint_domain_images(fixed_image, moving_image,
+                                                                                   cm_alignment=cm_alignment,
+                                                                                   compute_masks=True)
 
 
     # align also moving points
@@ -105,7 +107,10 @@ def main():
 
 
     print("perform registration")
-    for level, (mov_im_level, mov_msk_level, fix_im_level, fix_msk_level) in enumerate(zip(moving_image_pyramid, moving_mask_pyramid, fixed_image_pyramid, fixed_mask_pyramid)):
+    for level, (mov_im_level, mov_msk_level, fix_im_level, fix_msk_level) in enumerate(zip(moving_image_pyramid,
+                                                                                           moving_mask_pyramid,
+                                                                                           fixed_image_pyramid,
+                                                                                           fixed_mask_pyramid)):
 
 
         print("---- Level "+str(level)+" ----")

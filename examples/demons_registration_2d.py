@@ -39,6 +39,7 @@ def main():
     # Here, the GPU with the index 0 is used.
     device = th.device("cuda:0")
 
+    # create test image data
     fixed_image, moving_image, shaded_image = create_C_2_O_test_images(256, dtype=dtype, device=device)
 
     # create pairwise registration object

@@ -13,19 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import SimpleITK as sitk
-import torch as th
-
-import matplotlib.pyplot as plt
-import time
-
 import sys
 import os
+import time
+
+import matplotlib.pyplot as plt
+import torch as th
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import airlab as al
 
+from create_test_image_data import create_C_2_O_test_images
 
 def main():
     start = time.time()
@@ -37,16 +36,10 @@ def main():
 
     # In order to use a GPU uncomment the following line. The number is the device index of the used GPU
     # Here, the GPU with the index 0 is used.
-    #device = th.device("cuda:0")
+    device = th.device("cuda:0")
 
-    # load the image data and normalize to [0, 1]
-    itkImg = sitk.ReadImage("./data/affine_test_image_2d_fixed.png", sitk.sitkFloat32)
-    itkImg = sitk.RescaleIntensity(itkImg, 0, 1)
-    fixed_image = al.create_tensor_image_from_itk_image(itkImg, dtype=dtype, device=device)
-
-    itkImg = sitk.ReadImage("./data/affine_test_image_2d_moving.png", sitk.sitkFloat32)
-    itkImg = sitk.RescaleIntensity(itkImg, 0, 1)
-    moving_image = al.create_tensor_image_from_itk_image(itkImg, dtype=dtype, device=device)
+    # create test image data
+    fixed_image, moving_image, shaded_image = create_C_2_O_test_images(256, dtype=dtype, device=device)
 
     # create image pyramide size/4, size/2, size/1
     fixed_image_pyramid = al.create_image_pyramid(fixed_image, [[4, 4], [2, 2]])
@@ -66,13 +59,13 @@ def main():
                                                                           sigma=sigma[level],
                                                                           order=3,
                                                                           dtype=dtype,
-                                                                          device=device)
+                                                                          device=device,
+                                                                          differmorphic=False)
 
         if level > 0:
             constant_displacement = al.transformation.utils.upsample_displacement(constant_displacement,
                                                                                   mov_im_level.size,
                                                                                   interpolation="linear")
-
             transformation.set_constant_displacement(constant_displacement)
 
         registration.set_transformation(transformation)
@@ -100,7 +93,7 @@ def main():
 
     # create final result
     displacement = transformation.get_displacement()
-    warped_image = al.transformation.utils.warp_image(moving_image, displacement)
+    warped_image = al.transformation.utils.warp_image(shaded_image, displacement)
     displacement = al.create_displacement_image_from_image(displacement, moving_image)
 
     end = time.time()
@@ -128,15 +121,6 @@ def main():
     plt.title('Magnitude Displacement')
 
     plt.show()
-
-    # write result images
-    # sitk.WriteImage(warped_image.itk(), '/tmp/rigid_warped_image.vtk')
-    # sitk.WriteImage(moving_image.itk(), '/tmp/rigid_moving_image.vtk')
-    # sitk.WriteImage(fixed_image.itk(), '/tmp/rigid_fixed_image.vtk')
-    # sitk.WriteImage(displacement.itk(), '/tmp/demons_displacement_image.vtk')
-
-
-
 
 if __name__ == '__main__':
     main()
