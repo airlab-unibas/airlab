@@ -22,7 +22,7 @@ def compute_grid(image_size, dtype=th.float32, device='cpu'):
 
     dim = len(image_size)
 
-    if(dim == 2):
+    if dim == 2:
         nx = image_size[0]
         ny = image_size[1]
 
@@ -37,7 +37,7 @@ def compute_grid(image_size, dtype=th.float32, device='cpu'):
 
         return th.cat((x, y), 3).to(dtype=dtype, device=device)
 
-    elif(dim == 3):
+    elif dim == 3:
         nz = image_size[0]
         ny = image_size[1]
         nx = image_size[2]
@@ -59,11 +59,10 @@ def compute_grid(image_size, dtype=th.float32, device='cpu'):
         print("Error " + dim + "is not a valid grid type")
 
 
-"""
-    Upsample displacement field
-"""
 def upsample_displacement(displacement, new_size, interpolation="linear"):
-
+    """
+        Upsample displacement field
+    """
     dim = displacement.size()[-1]
     if dim == 2:
         displacement = th.transpose(displacement.unsqueeze_(0), 0, 3).unsqueeze_(0)
@@ -84,7 +83,6 @@ def upsample_displacement(displacement, new_size, interpolation="linear"):
         upsampled_displacement = th.transpose(upsampled_displacement.unsqueeze_(-1), 1, -1)
     elif dim == 3:
         upsampled_displacement = th.transpose(upsampled_displacement.unsqueeze_(-1), 1, -1)
-
 
     return upsampled_displacement[0, 0, ...]
 
@@ -147,7 +145,6 @@ def rotation_matrix(phi_x, phi_y, phi_z, dtype=th.float32, device='cpu', homogen
     return matrix
 
 
-
 class Diffeomorphic():
     def __init__(self, image_size=None, scaling=10, dtype=th.float32, device='cpu'):
 
@@ -187,7 +184,7 @@ class Diffeomorphic():
         return scaling
 
     @staticmethod
-    def diffeomorphic_2D(displacement, grid, scaling=15):
+    def diffeomorphic_2D(displacement, grid, scaling=0):
 
         if scaling < 0:
             scaling = Diffeomorphic._compute_scaling_value(displacement)

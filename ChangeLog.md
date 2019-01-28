@@ -10,3 +10,13 @@ All notable changes to this project will be documented in this file.
 - New class for handling point sets (read, write, transformation with a displacement field and TRE calculation)
 - Added a BedRemoval filter and an auto crop function
 - Added a Bspline kernel registration example for 3d where all the new features are used
+
+## [v0.2.0]
+- Reduce number of input parameter for the registration classes
+- Added new non-deformable transformation: similarity and affine transformations 
+- Added new image loss: Mutual Information
+- Added new image loss: Normalized Gradient Fields
+- Added new image loss: Structural Similarity Image Measure
+- Added new diffeomorphic transformation option for all deformable transformation
+- Bugfix verbose flag
+

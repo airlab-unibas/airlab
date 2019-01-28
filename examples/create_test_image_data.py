@@ -51,13 +51,10 @@ def create_C_2_O_test_images(image_size, dtype=th.float32, device='cpu'):
 
     shaded_image[np.logical_not(index)] = shaded_image[np.logical_not(index)]/np.max(shaded_image[np.logical_not(index)])
 
-
-
     index_2 = moving_image > 0
     moving_image[index_2] = 0
 
     moving_image[index] = 1
-
 
     return [al.image_from_numpy(fixed_image, [1, 1], [0, 0], dtype=dtype, device=device),
             al.image_from_numpy(moving_image, [1, 1], [0, 0], dtype=dtype, device=device),
