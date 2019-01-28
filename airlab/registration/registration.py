@@ -129,7 +129,7 @@ class PairwiseRegistration(_PairwiseRegistration):
 
         if EarlyStopping:
             from copy import deepcopy
-            n=0
+            n = 0
             try:
                 self.loss
             except:
@@ -141,15 +141,15 @@ class PairwiseRegistration(_PairwiseRegistration):
             loss = self._optimizer.step(self._closure)
             if EarlyStopping:
                 if loss < self.loss:
-                    n=0
+                    n = 0
                     self.loss=loss
                     best=deepcopy(self._transformation)
                 else:
-                    n+=1
-                if n>StopPatience:
-                    self._transformation=best
+                    n += 1
+                if n > StopPatience:
+                    self._transformation = best
                     return
-        self.loss=loss
+        self.loss = loss
 
 
 class DemonsRegistraion(_Registration):
