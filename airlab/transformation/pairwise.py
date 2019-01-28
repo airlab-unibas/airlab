@@ -25,7 +25,7 @@ from . import utils as tu
     Base class for a transformation
 """
 class _Transformation(th.nn.Module):
-    def __init__(self, image_size, dtype=th.float32, device='cpu'):
+    def __init__(self, image_size, diffeomorphic=False, dtype=th.float32, device='cpu'):
         super(_Transformation, self).__init__()
 
         self._dtype = dtype
@@ -33,7 +33,12 @@ class _Transformation(th.nn.Module):
         self._dim = len(image_size)
         self._image_size = np.array(image_size)
         self._constant_displacement = None
+        self._diffeomorphic = diffeomorphic
 
+        if self._diffeomorphic:
+            self._diffeomorphic_calculater = tu.Diffeomorphic(image_size, dtype=dtype, device=device)
+        else:
+            self._diffeomorphic_calculater = None
 
     def get_displacement_numpy(self):
 
@@ -46,7 +51,6 @@ class _Transformation(th.nn.Module):
 
             return self().detach()
 
-
     def get_current_displacement(self):
 
         if self._dim == 2:
@@ -54,11 +58,25 @@ class _Transformation(th.nn.Module):
         elif self._dim == 3:
             return self().detach().cpu().numpy()
 
-
     def set_constant_displacement(self, displacement):
 
         self._constant_displacement = displacement
 
+    def get_inverse_transformation(self, displacement):
+        if self._diffeomorphic:
+            if self._dim == 2:
+                inv_displacement = self._diffeomorphic_calculater.calculate(displacement * -1)
+            else:
+                inv_displacement = self._diffeomorphic_calculater.calculate(displacement * -1)
+        else:
+            print("error displacement ")
+            inv_displacement = None
+
+        return inv_displacement
+
+    def _diffeomorphic_transformation(self, displacement):
+
+        return self._diffeomorphic_calculater.calculate(displacement)
 
     def _return_displacement(self, displacement):
 
@@ -337,8 +355,8 @@ class AffineTransformation(SimilarityTransformation):
     None parametric transformation
 """
 class NonParametricTransformation(_Transformation):
-    def __init__(self, image_size, dtype=th.float32, device='cpu'):
-        super(NonParametricTransformation, self).__init__(image_size, dtype, device)
+    def __init__(self, image_size,  diffeomorphic=False, dtype=th.float32, device='cpu'):
+        super(NonParametricTransformation, self).__init__(image_size, diffeomorphic, dtype, device)
 
         self._tensor_size = [self._dim] + self._image_size.tolist()
 
@@ -352,7 +370,6 @@ class NonParametricTransformation(_Transformation):
         else:
             self._compute_displacement = self._compute_displacement_3d
 
-
     def set_start_parameter(self, parameters):
         if self._dim == 2:
             self.trans_parameters = Parameter(th.tensor(parameters.transpose(0, 2)))
@@ -360,24 +377,26 @@ class NonParametricTransformation(_Transformation):
             self.trans_parameters = Parameter(th.tensor(parameters.transpose(0, 1)
                                                         .transpose(0, 2).transpose(0, 3)))
 
-
     def _compute_displacement_2d(self):
         return self.trans_parameters.transpose(0, 2).transpose(0, 1)
 
     def _compute_displacement_3d(self):
         return self.trans_parameters.transpose(0, 3).transpose(0, 2).transpose(0, 1)
 
-
-
     def forward(self):
-        return self._return_displacement(self._compute_displacement())
+        displacement = self._return_displacement(self._compute_displacement())
+
+        if self._diffeomorphic:
+            displacement = self._diffeomorphic_transformation(displacement)
+
+        return displacement
 
 """
     Base class for kernel transformations
 """
 class _KernelTransformation(_Transformation):
-    def __init__(self, image_size, dtype=th.float32, device='cpu'):
-        super(_KernelTransformation, self).__init__(image_size, dtype, device)
+    def __init__(self, image_size, diffeomorphic=False, dtype=th.float32, device='cpu'):
+        super(_KernelTransformation, self).__init__(image_size, diffeomorphic, dtype, device)
 
         self._kernel = None
         self._stride = 1
@@ -392,14 +411,12 @@ class _KernelTransformation(_Transformation):
         else:
             self._compute_displacement = self._compute_displacement_3d
 
-
     def get_current_displacement(self):
 
         if self._dim == 2:
             return th.unsqueeze(self._compute_displacement().detach(), 0).cpu().numpy()
         elif self._dim == 3:
             return self._compute_displacement().detach().cpu().numpy()
-
 
     def _initialize(self):
 
@@ -443,7 +460,6 @@ class _KernelTransformation(_Transformation):
         size = [1, 1] + self._image_size.astype(dtype=int).tolist()
         self._displacement = th.empty(*size, dtype=self._dtype, device=self._device)
 
-
     def _compute_displacement_2d(self):
         displacement_tmp = F.conv_transpose2d(self.trans_parameters, self._kernel,
                                           padding=self._padding, stride=self._stride, groups=2)
@@ -452,7 +468,6 @@ class _KernelTransformation(_Transformation):
         return th.squeeze(displacement_tmp[:, :,
                        self._stride[0] + self._crop_start[0]:-self._stride[0] - self._crop_end[0],
                        self._stride[1] + self._crop_start[1]:-self._stride[1] - self._crop_end[1]].transpose_(1, 3).transpose(1, 2))
-
 
     def _compute_displacement_3d(self):
 
@@ -466,18 +481,21 @@ class _KernelTransformation(_Transformation):
                                   self._stride[2] + self._crop_start[2]:-self._stride[2] - self._crop_end[2]
                                   ].transpose_(1,4).transpose_(1,3).transpose_(1,2))
 
-
     def forward(self):
 
-        return self._return_displacement(self._compute_displacement())
+        displacement = self._return_displacement(self._compute_displacement())
 
+        if self._diffeomorphic:
+            displacement = self._diffeomorphic_transformation(displacement)
+
+        return displacement
 
 """
     bspline kernel transformation
 """
 class BsplineTransformation(_KernelTransformation):
-    def __init__(self, image_size, sigma, order=2, dtype=th.float32, device='cpu'):
-        super(BsplineTransformation, self).__init__(image_size, dtype, device)
+    def __init__(self, image_size, sigma, differmorphic=False, order=2, dtype=th.float32, device='cpu'):
+        super(BsplineTransformation, self).__init__(image_size, differmorphic, dtype, device)
 
         self._stride = np.array(sigma)
 
@@ -497,8 +515,8 @@ class BsplineTransformation(_KernelTransformation):
     Wendland kernel transformation
 """
 class WendlandKernelTransformation(_KernelTransformation):
-    def __init__(self, image_size, sigma, cp_scale=2, ktype="C4", dtype=th.float32, device='cpu'):
-        super(WendlandKernelTransformation, self).__init__(image_size, dtype, device)
+    def __init__(self, image_size, sigma, cp_scale=2, differmorphic=False, ktype="C4", dtype=th.float32, device='cpu'):
+        super(WendlandKernelTransformation, self).__init__(image_size, differmorphic, dtype, device)
 
         self._stride = np.array(sigma)
 

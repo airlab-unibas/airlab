@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import torch as th
-
-import matplotlib.pyplot as plt
-import time
 
 import sys
 import os
+import time
+
+import matplotlib.pyplot as plt
+
+import torch as th
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -36,7 +37,7 @@ def main():
 
     # In order to use a GPU uncomment the following line. The number is the device index of the used GPU
     # Here, the GPU with the index 0 is used.
-    # device = th.device("cuda:0")
+    device = th.device("cuda:0")
 
     fixed_image, moving_image, shaded_image = create_C_2_O_test_images(256, dtype=dtype, device=device)
 
@@ -44,7 +45,10 @@ def main():
     registration = al.DemonsRegistraion(dtype=dtype, device=device, verbose=False)
 
     # choose the affine transformation model
-    transformation = al.transformation.pairwise.NonParametricTransformation(moving_image.size, dtype=dtype, device=device)
+    transformation = al.transformation.pairwise.NonParametricTransformation(moving_image.size,
+                                                                            dtype=dtype,
+                                                                            device=device,
+                                                                            diffeomorphic=True)
 
     registration.set_transformation(transformation)
 
@@ -54,12 +58,13 @@ def main():
     registration.set_image_loss([image_loss])
 
     # choose a regulariser for the demons
-    regulariser = al.regulariser.demons.GaussianRegulariser(moving_image.spacing, sigma=[2, 2], dtype=dtype, device=device)
+    regulariser = al.regulariser.demons.GaussianRegulariser(moving_image.spacing, sigma=[2, 2], dtype=dtype,
+                                                            device=device)
 
     registration.set_regulariser([regulariser])
 
     # choose the Adam optimizer to minimize the objective
-    optimizer = th.optim.Adam(transformation.parameters(), lr=0.07)
+    optimizer = th.optim.Adam(transformation.parameters(), lr=0.01)
 
     registration.set_optimizer(optimizer)
     registration.set_number_of_iterations(1000)

@@ -133,9 +133,76 @@ def unit_displacement_to_dispalcement(displacement):
 def rotation_matrix(phi_x, phi_y, phi_z, dtype=th.float32, device='cpu'):
     R_x = th.Tensor([[1, 0, 0], [0, th.cos(phi_x), -th.sin(phi_x)], [0, th.sin(phi_x), th.cos(phi_x)]])
     R_y = th.Tensor([[th.cos(phi_y), 0, th.sin(phi_y)], [0, 1, 0], [-th.sin(phi_y), 0, th.cos(phi_y)]])
-    R_z = th.Tensor([[h.cos(phi_z), -th.sin(phi_z), 0], [th.sin(phi_z), th.cos(phi_z), 0], [0, 0, 1]])
+    R_z = th.Tensor([[th.cos(phi_z), -th.sin(phi_z), 0], [th.sin(phi_z), th.cos(phi_z), 0], [0, 0, 1]])
 
     return th.mm(th.mm(R_z, R_y), R_x).to(dtype=dtype, device=device)
+
+
+class Diffeomorphic():
+    def __init__(self, image_size=None, scaling=10, dtype=th.float32, device='cpu'):
+
+        self._dtype = dtype
+        self._device = device
+        self._dim = len(image_size)
+        self._image_size = image_size
+        self._scaling = scaling
+        self._init_scaling = 8
+
+        if image_size is not None:
+            self._image_grid = compute_grid(image_size, dtype=dtype, device=device)
+        else:
+            self._image_grid = None
+
+    def set_image_size(self, image_szie):
+        self._image_size = image_szie
+        self._image_grid = compute_grid(self._image_size, dtype=self._dtype, device=self._device)
+
+    def calculate(self, displacement):
+        if self._dim == 2:
+            return Diffeomorphic.diffeomorphic_2D(displacement, self._image_grid, self._scaling)
+        else:
+            return Diffeomorphic.diffeomorphic_3D(displacement, self._image_grid, self._scaling)
+
+    @staticmethod
+    def _compute_scaling_value(displacement):
+
+        with th.no_grad():
+            scaling = 8
+            norm = th.norm(displacement / (2 ** scaling))
+
+            while norm > 0.5:
+                scaling += 1
+                norm = th.norm(displacement / (2 ** scaling))
+
+        return scaling
+
+    @staticmethod
+    def diffeomorphic_2D(displacement, grid, scaling=15):
+
+        if scaling < 0:
+            scaling = Diffeomorphic._compute_scaling_value(displacement)
+
+        displacement = displacement / (2 ** scaling)
+
+        displacement = displacement.transpose(2, 1).transpose(1, 0).unsqueeze(0)
+
+        for i in range(scaling):
+            displacement_trans = displacement.transpose(1, 2).transpose(2, 3)
+            displacement = displacement + F.grid_sample(displacement, displacement_trans + grid)
+
+        return displacement.transpose(1, 2).transpose(2, 3).squeeze()
+
+    @staticmethod
+    def diffeomorphic_3D(displacement, grid, scaling=8):
+        displacement = displacement / (2 ** scaling)
+
+        displacement = displacement.transpose(3, 2).transpose(2, 1).transpose(0, 1).unsqueeze(0)
+
+        for i in range(scaling):
+            displacement_trans = displacement.transpose(3, 2).transpose(2, 1).transpose(0, 1).unsqueeze(0)
+            displacement = displacement + F.grid_sample(displacement, displacement_trans + grid)
+
+        return displacement.transpose(1, 2).transpose(2, 3).transpose(3, 4).squeeze()
 
 
 
