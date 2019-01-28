@@ -146,6 +146,17 @@ def rotation_matrix(phi_x, phi_y, phi_z, dtype=th.float32, device='cpu', homogen
 
 
 class Diffeomorphic():
+    r"""
+    Diffeomorphic transformation. This class computes the matrix exponential of a given flow field using the scaling
+    and squaring algorithm according to:
+              Unsupervised Learning for Fast Probabilistic Diffeomorphic Registration
+              Adrian V. Dalca, Guha Balakrishnan, John Guttag, Mert R. Sabuncu
+              MICCAI 2018
+              and
+              Diffeomorphic Demons: Efficient Non-parametric Image Registration
+              Tom Vercauterena et al., 2008
+
+    """
     def __init__(self, image_size=None, scaling=10, dtype=th.float32, device='cpu'):
 
         self._dtype = dtype
