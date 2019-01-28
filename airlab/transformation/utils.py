@@ -184,7 +184,7 @@ class Diffeomorphic():
         return scaling
 
     @staticmethod
-    def diffeomorphic_2D(displacement, grid, scaling=0):
+    def diffeomorphic_2D(displacement, grid, scaling=-1):
 
         if scaling < 0:
             scaling = Diffeomorphic._compute_scaling_value(displacement)
@@ -200,7 +200,7 @@ class Diffeomorphic():
         return displacement.transpose(1, 2).transpose(2, 3).squeeze()
 
     @staticmethod
-    def diffeomorphic_3D(displacement, grid, scaling=8):
+    def diffeomorphic_3D(displacement, grid, scaling=-1):
         displacement = displacement / (2 ** scaling)
 
         displacement = displacement.transpose(3, 2).transpose(2, 1).transpose(0, 1).unsqueeze(0)
