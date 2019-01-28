@@ -130,12 +130,22 @@ def unit_displacement_to_dispalcement(displacement):
 """
     Create a 3d rotation matrix
 """
-def rotation_matrix(phi_x, phi_y, phi_z, dtype=th.float32, device='cpu'):
+def rotation_matrix(phi_x, phi_y, phi_z, dtype=th.float32, device='cpu', homogene=False):
     R_x = th.Tensor([[1, 0, 0], [0, th.cos(phi_x), -th.sin(phi_x)], [0, th.sin(phi_x), th.cos(phi_x)]])
     R_y = th.Tensor([[th.cos(phi_y), 0, th.sin(phi_y)], [0, 1, 0], [-th.sin(phi_y), 0, th.cos(phi_y)]])
     R_z = th.Tensor([[th.cos(phi_z), -th.sin(phi_z), 0], [th.sin(phi_z), th.cos(phi_z), 0], [0, 0, 1]])
 
-    return th.mm(th.mm(R_z, R_y), R_x).to(dtype=dtype, device=device)
+    matrix = th.mm(th.mm(R_z, R_y), R_x).to(dtype=dtype, device=device)
+
+    if homogene:
+        matrix_homogene = th.zeros(4, 4, dtype=dtype, device=device)
+        matrix_homogene[3, 3] = 1
+        matrix_homogene[0:3, 0:3] = matrix
+
+        matrix = matrix_homogene
+
+    return matrix
+
 
 
 class Diffeomorphic():

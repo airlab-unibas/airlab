@@ -58,7 +58,7 @@ class Image:
         elif type(tensor_image)==th.Tensor:
             self.image = tensor_image.squeeze_().unsqueeze_(0).unsqueeze_(0)
         else:
-            raise Exception("A numpy ndarray or a torch tensor was expected as argument. Got "+str(type(tensor_image)))
+            raise Exception("A numpy ndarray or a torch tensor was expected as argument. Got " + str(type(tensor_image)))
 
         self.size = image_size
         self.spacing = image_spacing
@@ -94,7 +94,7 @@ class Image:
 
             self._reverse_axis()
         else:
-            raise Exception("A SimpleITK image was expected as argument. Got "+str(type(sitk_image)))
+            raise Exception("A SimpleITK image was expected as argument. Got " + str(type(sitk_image)))
 
 
     def to(self, dtype=None, device='cpu'):
@@ -144,7 +144,7 @@ class Image:
         device: on which device the image has to be allocated
         return (Image): an airlab image
         """
-        return Image(sitk.ReadImage(filename), dtype, device)
+        return Image(sitk.ReadImage(filename, sitk.sitkFloat32), dtype, device)
 
 
     def write(self, filename):

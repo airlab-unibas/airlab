@@ -43,7 +43,7 @@ def main():
     fixed_image, moving_image, shaded_image = create_C_2_O_test_images(256, dtype=dtype, device=device)
 
     # create pairwise registration object
-    registration = al.DemonsRegistraion(dtype=dtype, device=device, verbose=False)
+    registration = al.DemonsRegistraion(verbose=False)
 
     # choose the affine transformation model
     transformation = al.transformation.pairwise.NonParametricTransformation(moving_image.size,

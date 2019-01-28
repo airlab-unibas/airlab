@@ -19,12 +19,9 @@ import time
 import matplotlib.pyplot as plt
 import torch as th
 
-
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import airlab as al
-
 
 def main():
     start = time.time()
@@ -38,23 +35,23 @@ def main():
     # Here, the GPU with the index 0 is used.
     # device = th.device("cuda:0")
 
-    # load the image data and normalize to [0, 1]
-    fixed_image = al.read_image_as_tensor("./data/affine_test_image_2d_fixed.png", dtype=dtype, device=device)
-    moving_image = al.read_image_as_tensor("./data/affine_test_image_2d_moving.png", dtype=dtype, device=device)
+    # create 3D image volume with two objects
+    object_shift = 10
 
-    fixed_image, moving_image = al.utils.normalize_images(fixed_image, moving_image)
+    fixed_image = th.zeros(64, 64, 64).to(device=device)
+    fixed_image[16:32, 16:32, 16:32] = 1.0
+    fixed_image = al.Image(fixed_image, [64, 64, 64], [1, 1, 1], [0, 0, 0])
 
-    # convert intensities so that the object intensities are 1 and the background 0. This is important in order to
-    # calculate the center of mass of the object
-    fixed_image.image = 1 - fixed_image.image
-    moving_image.image = 1 - moving_image.image
+    moving_image = th.zeros(64, 64, 64).to(device=device)
+    moving_image[16 - object_shift:32 - object_shift, 16 - object_shift:32 - object_shift,
+    16 - object_shift:32 - object_shift] = 1.0
+    moving_image = al.Image(moving_image, [64, 64, 64], [1, 1, 1], [0, 0, 0])
 
     # create pairwise registration object
     registration = al.PairwiseRegistration()
 
     # choose the affine transformation model
-    transformation = al.transformation.pairwise.SimilarityTransformation(moving_image, opt_cm=True)
-    # initialize the translation with the center of mass of the fixed image
+    transformation = al.transformation.pairwise.RigidTransformation(moving_image, opt_cm=True)
     transformation.init_translation(fixed_image)
 
     registration.set_transformation(transformation)
@@ -65,15 +62,15 @@ def main():
     registration.set_image_loss([image_loss])
 
     # choose the Adam optimizer to minimize the objective
-    optimizer = th.optim.Adam(transformation.parameters(), lr=0.01, amsgrad=True)
+    optimizer = th.optim.Adam(transformation.parameters(), lr=0.1)
 
     registration.set_optimizer(optimizer)
-    registration.set_number_of_iterations(1000)
+    registration.set_number_of_iterations(500)
 
     # start the registration
     registration.start()
 
-    # set the intensities back to the original for the visualisation
+    # set the intensities for the visualisation
     fixed_image.image = 1 - fixed_image.image
     moving_image.image = 1 - moving_image.image
 
@@ -85,25 +82,28 @@ def main():
 
     print("=================================================================")
 
-    print("Registration done in:", end - start, "s")
+    print("Registration done in: ", end - start, " s")
     print("Result parameters:")
     transformation.print()
 
+    # sitk.WriteImage(warped_image.itk(), '/tmp/rigid_warped_image.vtk')
+    # sitk.WriteImage(moving_image.itk(), '/tmp/rigid_moving_image.vtk')
+    # sitk.WriteImage(fixed_image.itk(), '/tmp/rigid_fixed_image.vtk')
+
     # plot the results
     plt.subplot(131)
-    plt.imshow(fixed_image.numpy(), cmap='gray')
-    plt.title('Fixed Image')
+    plt.imshow(fixed_image.numpy()[16, :, :], cmap='gray')
+    plt.title('Fixed Image Slice')
 
     plt.subplot(132)
-    plt.imshow(moving_image.numpy(), cmap='gray')
-    plt.title('Moving Image')
+    plt.imshow(moving_image.numpy()[16, :, :], cmap='gray')
+    plt.title('Moving Image Slice')
 
     plt.subplot(133)
-    plt.imshow(warped_image.numpy(), cmap='gray')
-    plt.title('Warped Moving Image')
+    plt.imshow(warped_image.numpy()[16, :, :], cmap='gray')
+    plt.title('Warped Moving Image Slice')
 
     plt.show()
-
 
 if __name__ == '__main__':
     main()
