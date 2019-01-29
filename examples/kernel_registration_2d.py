@@ -60,7 +60,7 @@ def main():
                                                                           order=3,
                                                                           dtype=dtype,
                                                                           device=device,
-                                                                          diffeormorphic=True)
+                                                                          diffeomorphic=True)
 
         if level > 0:
             constant_displacement = al.transformation.utils.upsample_displacement(constant_displacement,
