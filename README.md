@@ -1,5 +1,7 @@
 <img width="50%" align="middle" src="docs/airlab_logo.png" alt="Airlab logo" />
 
+<img width="10%" align="middle" src="https://readthedocs.org/projects/airlab/badge/?version=latest&style=plastic" alt="docs status" />
+
 # Autograd Image Registration Laboratory
 AirLab is an open laboratory for medical image registration. It provides an environment
 for rapid prototyping and reproduction of registration algorithms. The unique feature of AirLab is, that the analytic gradients of the objective function are computed automatically with fosters rapid prototyping. In addition, the device on which the computations are performed, on a CPU or a GPU,
