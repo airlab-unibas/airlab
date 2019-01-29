@@ -90,8 +90,9 @@ class RigidTransformation(_Transformation):
     r"""
     Rigid centred transformation for 2D and 3D.
 
-    moving_image (Image): moving image for the registration
-    opt_cm (bool): using center of as parameter for the optimisation
+    Args:
+        moving_image (Image): moving image for the registration
+        opt_cm (bool): using center of as parameter for the optimisation
     """
     def __init__(self, moving_image, opt_cm=False):
         super(RigidTransformation, self).__init__(image_size=moving_image.size,
@@ -148,8 +149,8 @@ class RigidTransformation(_Transformation):
         Initialize the translation parameters with the difference between the center of mass of the
         fixed and the moving image
 
-        fixed_image (Image): Fixed image for the registration
-
+        Args:
+            fixed_image (Image): Fixed image for the registration
         """
         intensity_sum = th.sum(fixed_image.image)
 
@@ -232,11 +233,11 @@ class RigidTransformation(_Transformation):
 
 
 class SimilarityTransformation(RigidTransformation):
-    """
+    r"""
     Similarity centred transformation for 2D and 3D.
-
-    moving_image (Image): moving image for the registration
-    opt_cm (bool): using center of as parameter for the optimisation
+    Args:
+        moving_image (Image): moving image for the registration
+        opt_cm (bool): using center of as parameter for the optimisation
     """
     def __init__(self, moving_image, opt_cm=False):
         super(SimilarityTransformation, self).__init__(moving_image, opt_cm)
@@ -292,8 +293,9 @@ class AffineTransformation(SimilarityTransformation):
     """
     Affine centred transformation for 2D and 3D.
 
-    moving_image (Image): moving image for the registration
-    opt_cm (bool): using center of as parameter for the optimisation
+    Args:
+        moving_image (Image): moving image for the registration
+        opt_cm (bool): using center of as parameter for the optimisation
     """
     def __init__(self, moving_image, opt_cm=False):
         super(AffineTransformation, self).__init__(moving_image, opt_cm)
@@ -351,10 +353,11 @@ class AffineTransformation(SimilarityTransformation):
         return self._return_displacement(displacement)
 
 
-"""
-    None parametric transformation
-"""
+
 class NonParametricTransformation(_Transformation):
+    r"""
+        None parametric transformation
+    """
     def __init__(self, image_size,  diffeomorphic=False, dtype=th.float32, device='cpu'):
         super(NonParametricTransformation, self).__init__(image_size, diffeomorphic, dtype, device)
 
@@ -494,8 +497,8 @@ class _KernelTransformation(_Transformation):
     bspline kernel transformation
 """
 class BsplineTransformation(_KernelTransformation):
-    def __init__(self, image_size, sigma, differmorphic=False, order=2, dtype=th.float32, device='cpu'):
-        super(BsplineTransformation, self).__init__(image_size, differmorphic, dtype, device)
+    def __init__(self, image_size, sigma, diffeomorphic=False, order=2, dtype=th.float32, device='cpu'):
+        super(BsplineTransformation, self).__init__(image_size, diffeomorphic, dtype, device)
 
         self._stride = np.array(sigma)
 
@@ -515,8 +518,8 @@ class BsplineTransformation(_KernelTransformation):
     Wendland kernel transformation
 """
 class WendlandKernelTransformation(_KernelTransformation):
-    def __init__(self, image_size, sigma, cp_scale=2, differmorphic=False, ktype="C4", dtype=th.float32, device='cpu'):
-        super(WendlandKernelTransformation, self).__init__(image_size, differmorphic, dtype, device)
+    def __init__(self, image_size, sigma, cp_scale=2, diffeomorphic=False, ktype="C4", dtype=th.float32, device='cpu'):
+        super(WendlandKernelTransformation, self).__init__(image_size, diffeomorphic, dtype, device)
 
         self._stride = np.array(sigma)
 
