@@ -173,8 +173,18 @@ class Image:
     Object representing a displacement image
 """
 class Displacement(Image):
-    def __init__(self, tensor_image, image_size, image_spacing, image_origin):
-        super(Displacement, self).__init__(tensor_image, image_size, image_spacing, image_origin)
+    def __init__(self, *args, **kwargs):
+        """
+        Constructor for a displacement field object where two cases are distinguished:
+
+        - Construct airlab displacement field from an array or tensor (4 arguments)
+        - Construct airlab displacement field from an SimpleITK image (less than 4 arguments)
+        """
+        if len(args) == 4:
+            self.initializeForTensors(*args)
+        elif len(args) < 4:
+            self.initializeForImages(*args)
+
 
     def itk(self):
 
@@ -212,6 +222,19 @@ class Displacement(Image):
         self.image = self.image.squeeze_().permute(tuple(order))
         self.image = flip(self.image, self.ndim-1)
         self.image.unsqueeze_(0).unsqueeze_(0)
+
+
+    @staticmethod
+    def read(filename, dtype=th.float32, device='cpu'):
+        """
+        Static method to directly read a displacement field through the Image class
+
+        filename (str): filename of the displacement field
+        dtype: specific dtype for representing the tensor
+        device: on which device the displacement field has to be allocated
+        return (Displacement): an airlab displacement field
+        """
+        return Displacement(sitk.ReadImage(filename, sitk.sitkVectorFloat32), dtype, device)
 
 
 def flip(x, dim):
