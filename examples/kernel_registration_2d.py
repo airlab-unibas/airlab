@@ -36,7 +36,7 @@ def main():
 
     # In order to use a GPU uncomment the following line. The number is the device index of the used GPU
     # Here, the GPU with the index 0 is used.
-    device = th.device("cuda:0")
+    # device = th.device("cuda:0")
 
     # create test image data
     fixed_image, moving_image, shaded_image = create_C_2_O_test_images(256, dtype=dtype, device=device)
@@ -45,7 +45,7 @@ def main():
     fixed_image_pyramid = al.create_image_pyramid(fixed_image, [[4, 4], [2, 2]])
     moving_image_pyramid = al.create_image_pyramid(moving_image, [[4, 4], [2, 2]])
 
-    constant_displacement = None
+    constant_flow = None
     regularisation_weight = [1, 5, 50]
     number_of_iterations = [500, 500, 500]
     sigma = [[11, 11], [11, 11], [3, 3]]
@@ -59,14 +59,13 @@ def main():
                                                                           sigma=sigma[level],
                                                                           order=3,
                                                                           dtype=dtype,
-                                                                          device=device,
-                                                                          diffeomorphic=True)
+                                                                          device=device)
 
         if level > 0:
-            constant_displacement = al.transformation.utils.upsample_displacement(constant_displacement,
-                                                                                  mov_im_level.size,
-                                                                                  interpolation="linear")
-            transformation.set_constant_displacement(constant_displacement)
+            constant_flow = al.transformation.utils.upsample_displacement(constant_flow,
+                                                                          mov_im_level.size,
+                                                                          interpolation="linear")
+            transformation.set_constant_flow(constant_flow)
 
         registration.set_transformation(transformation)
 
@@ -81,7 +80,7 @@ def main():
 
         registration.set_regulariser_displacement([regulariser])
 
-        #define the optimizer
+        # define the optimizer
         optimizer = th.optim.Adam(transformation.parameters())
 
         registration.set_optimizer(optimizer)
@@ -89,7 +88,7 @@ def main():
 
         registration.start()
 
-        constant_displacement = transformation.get_displacement()
+        constant_flow = transformation.get_flow()
 
     # create final result
     displacement = transformation.get_displacement()

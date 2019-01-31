@@ -40,7 +40,6 @@ def main():
     # load the image data and normalize intensities to [0, 1]
     loader = al.ImageLoader(tmp_directory)
 
-
     # Images:
     p1_name = "4DCT_POPI_1"
     p1_img_nr = "image_00"
@@ -62,14 +61,12 @@ def main():
         initial_tre = al.Points.TRE(fixed_points, moving_points)
         print("initial TRE: "+str(initial_tre))
 
-
     print("preprocessing images")
     (fixed_image, fixed_body_mask) = al.remove_bed_filter(fixed_image)
     (moving_image, moving_body_mask) = al.remove_bed_filter(moving_image)
 
     # normalize image intensities using common minimum and common maximum
     fixed_image, moving_image = al.utils.normalize_images(fixed_image, moving_image)
-
 
     # only perform center of mass alignment if inter subject registration is performed
     if p1_name == p2_name:
@@ -81,7 +78,6 @@ def main():
     f_image, f_mask, m_image, m_mask, cm_displacement = al.get_joint_domain_images(fixed_image, moving_image,
                                                                                    cm_alignment=cm_alignment,
                                                                                    compute_masks=True)
-
 
     # align also moving points
     if not cm_displacement is None and using_landmarks:
@@ -98,20 +94,17 @@ def main():
     moving_image_pyramid = al.create_image_pyramid(m_image, [[8, 8, 8], [4, 4, 4], [2, 2, 2]])
     moving_mask_pyramid = al.create_image_pyramid(m_mask, [[8, 8, 8], [4, 4, 4], [2, 2, 2]])
 
-
-    constant_displacement = None
+    constant_flow = None
     regularisation_weight = [1e-2, 1e-1, 1e-0, 1e+2]
     number_of_iterations = [300, 200, 100, 50]
     sigma = [[9, 9, 9], [9, 9, 9], [9, 9, 9], [9, 9, 9]]
     step_size = [1e-2, 4e-3, 2e-3, 2e-3]
-
 
     print("perform registration")
     for level, (mov_im_level, mov_msk_level, fix_im_level, fix_msk_level) in enumerate(zip(moving_image_pyramid,
                                                                                            moving_mask_pyramid,
                                                                                            fixed_image_pyramid,
                                                                                            fixed_mask_pyramid)):
-
 
         print("---- Level "+str(level)+" ----")
         registration = al.PairwiseRegistration()
@@ -124,11 +117,11 @@ def main():
                                                                           device=device)
 
         if level > 0:
-            constant_displacement = al.transformation.utils.upsample_displacement(constant_displacement,
-                                                                                  mov_im_level.size,
-                                                                                  interpolation="linear")
+            constant_flow = al.transformation.utils.upsample_displacement(constant_flow,
+                                                                          mov_im_level.size,
+                                                                          interpolation="linear")
 
-            transformation.set_constant_displacement(constant_displacement)
+            transformation.set_constant_flow(constant_flow)
 
         registration.set_transformation(transformation)
 
@@ -143,7 +136,7 @@ def main():
 
         registration.set_regulariser_displacement([regulariser])
 
-        #define the optimizer
+        # define the optimizer
         optimizer = th.optim.Adam(transformation.parameters(), lr=step_size[level], amsgrad=True)
 
         registration.set_optimizer(optimizer)
@@ -151,12 +144,12 @@ def main():
 
         registration.start()
 
-        # store current displacement field
-        constant_displacement = transformation.get_displacement()
+        # store current flow field
+        constant_flow = transformation.get_flow()
 
-
+        current_displacement = transformation.get_displacement()
         # generate SimpleITK displacement field and calculate TRE
-        tmp_displacement = al.transformation.utils.upsample_displacement(constant_displacement.clone().to(device='cpu'),
+        tmp_displacement = al.transformation.utils.upsample_displacement(current_displacement.clone().to(device='cpu'),
                                                                          m_image.size, interpolation="linear")
         tmp_displacement = al.transformation.utils.unit_displacement_to_dispalcement(tmp_displacement)  # unit measures to image domain measures
         tmp_displacement = al.create_displacement_image_from_image(tmp_displacement, m_image)
@@ -165,7 +158,6 @@ def main():
         # in order to not invert the displacement field, the fixed points are transformed to match the moving points
         if using_landmarks:
             print("TRE on that level: "+str(al.Points.TRE(moving_points_aligned, al.Points.transform(fixed_points, tmp_displacement))))
-
 
     # create final result
     displacement = transformation.get_displacement()
@@ -181,7 +173,6 @@ def main():
         fixed_points_transformed = al.Points.transform(fixed_points, displacement)
         print("Final TRE: " + str(al.Points.TRE(moving_points_aligned, fixed_points_transformed)))
 
-
     # write result images
     print("writing results")
     warped_image.write('/tmp/bspline_warped_image.vtk')
@@ -195,12 +186,8 @@ def main():
         al.Points.write('/tmp/bspline_fixed_points_transformed.vtk', fixed_points_transformed)
         al.Points.write('/tmp/bspline_moving_points_aligned.vtk', moving_points_aligned)
 
-
-
     print("=================================================================")
     print("Registration done in: ", end - start, " seconds")
-
-
 
 
 if __name__ == '__main__':

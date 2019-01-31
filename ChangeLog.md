@@ -21,3 +21,9 @@ All notable changes to this project will be documented in this file.
 center of mass to the optimization parameters
 - Bugfix verbose flag
 
+## [v0.2.1]
+- Bugfix diffeomorphic transformation for multi-level registration
+- Refectoring of the transformation class for the distinction for flow fields and displacement fields
+- Added new example for multi-level diffeomorphic B-spline registration
+
+
