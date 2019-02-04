@@ -19,15 +19,15 @@ import numpy as np
 
 # Regulariser base class (standard from PyTorch)
 class _ParameterRegulariser(th.nn.modules.Module):
-    def __init__(self, parameter_name, weight=1, size_average=True, reduce=True):
+    def __init__(self, parameter_name, size_average=True, reduce=True):
         super(_ParameterRegulariser, self).__init__()
         self._size_average = size_average
         self._reduce = reduce
-        self._weight = weight
+        self._weight = 1
         self.name = "parent"
         self._parameter_name = parameter_name
 
-    def set_weight(self, weight):
+    def SetWeight(self, weight):
         self._weight = weight
 
     # conditional return
@@ -44,18 +44,15 @@ class _ParameterRegulariser(th.nn.modules.Module):
     Base class for spatial parameter regulariser
 """
 class _SpatialParameterRegulariser(_ParameterRegulariser):
-    def __init__(self, parameter_name, weight=1, scaling=[1], size_average=True, reduce=True):
-        super(_SpatialParameterRegulariser, self).__init__(parameter_name, weight, size_average, reduce)
+    def __init__(self, parameter_name, scaling=[1], size_average=True, reduce=True):
+        super(_SpatialParameterRegulariser, self).__init__(parameter_name, size_average, reduce)
 
         self._dim = len(scaling)
         self._scaling = scaling
-        if len(weight) == 1:
+        if len(scaling) == 1:
             self._scaling = np.ones(self._dim)*self._scaling[0]
 
         self.name = "parent"
-
-    def set_weight(self, weight):
-        self._weight = weight
 
     # conditional return
     def return_loss(self, tensor):
@@ -70,8 +67,8 @@ class _SpatialParameterRegulariser(_ParameterRegulariser):
     Isotropic TV regularisation
 """
 class IsotropicTVRegulariser(_SpatialParameterRegulariser):
-    def __init__(self, parameter_name, weight=1, scaling=[1], size_average=True, reduce=True):
-        super(IsotropicTVRegulariser, self).__init__(parameter_name, weight, scaling, size_average, reduce)
+    def __init__(self, parameter_name, scaling=[1], size_average=True, reduce=True):
+        super(IsotropicTVRegulariser, self).__init__(parameter_name, scaling, size_average, reduce)
 
         self.name = "param_isoTV"
 
@@ -104,8 +101,8 @@ class IsotropicTVRegulariser(_SpatialParameterRegulariser):
     TV regularisation 
 """
 class TVRegulariser(_SpatialParameterRegulariser):
-    def __init__(self, parameter_name, weight=1, scaling=[1], size_average=True, reduce=True):
-        super(TVRegulariser, self).__init__(parameter_name, weight, scaling, size_average, reduce)
+    def __init__(self, parameter_name, scaling=[1], size_average=True, reduce=True):
+        super(TVRegulariser, self).__init__(parameter_name, scaling, size_average, reduce)
 
         self.name = "param_TV"
 
@@ -172,8 +169,8 @@ class DiffusionRegulariser(_SpatialParameterRegulariser):
     Sparsity regularisation 
 """
 class SparsityRegulariser(_ParameterRegulariser):
-    def __init__(self, parameter_name, weight=1, size_average=True, reduce=True):
-        super(SparsityRegulariser, self).__init__(parameter_name, weight, size_average, reduce)
+    def __init__(self, parameter_name, size_average=True, reduce=True):
+        super(SparsityRegulariser, self).__init__(parameter_name, size_average, reduce)
 
         self.name = "param_L1"
 
