@@ -27,9 +27,31 @@ class _Regulariser(th.nn.modules.Module):
         self._dim = len(pixel_spacing)
         self._pixel_spacing = pixel_spacing
         self.name = "parent"
+        self._mask = None
 
     def SetWeight(self, weight):
+        print("SetWeight is deprecated. Use set_weight instead.")
+        self.set_weight(weight)
+
+    def set_weight(self, weight):
         self._weight = weight
+
+    def set_mask(self, mask):
+        self._mask = mask
+
+    def _mask_2d(self, df):
+        if not self._mask is None:
+            nx, ny, d = df.shape
+            return df * self._mask.image.squeeze()[:nx,:ny].unsqueeze(-1).repeat(1,1,d)
+        else:
+            return df
+
+    def _mask_3d(self, df):
+        if not self._mask is None:
+            nx, ny, nz, d = df.shape
+            return df * self._mask.image.squeeze()[:nx,:ny,:nz].unsqueeze(-1).repeat(1,1,1,d)
+        else:
+            return df
 
     # conditional return
     def return_loss(self, tensor):
@@ -58,14 +80,14 @@ class IsotropicTVRegulariser(_Regulariser):
         dx = (displacement[1:, 1:, :] - displacement[:-1, 1:, :]).pow(2)*self._pixel_spacing[0]
         dy = (displacement[1:, 1:, :] - displacement[1:, :-1, :]).pow(2)*self._pixel_spacing[1]
 
-        return dx + dy
+        return self._mask_2d(F.pad(dx + dy, (0,1,0,1)))
 
     def _isotropic_TV_regulariser_3d(self, displacement):
         dx = (displacement[1:, 1:, 1:, :] - displacement[:-1, 1:, 1:, :]).pow(2)*self._pixel_spacing[0]
         dy = (displacement[1:, 1:, 1:, :] - displacement[1:, :-1, 1:, :]).pow(2)*self._pixel_spacing[1]
         dz = (displacement[1:, 1:, 1:, :] - displacement[1:, 1:, :-1, :]).pow(2)*self._pixel_spacing[2]
 
-        return dx + dy + dz
+        return self._mask_3d(F.pad(dx + dy + dz, (0,1,0,1,0,1)))
 
     def forward(self, displacement):
 
@@ -94,14 +116,14 @@ class TVRegulariser(_Regulariser):
         dx = th.abs(displacement[1:, 1:, :] - displacement[:-1, 1:, :])*self._pixel_spacing[0]
         dy = th.abs(displacement[1:, 1:, :] - displacement[1:, :-1, :])*self._pixel_spacing[1]
 
-        return dx + dy
+        self._mask_2d(F.pad(dx + dy, (0, 1, 0, 1)))
 
     def _TV_regulariser_3d(self, displacement):
         dx = th.abs(displacement[1:, 1:, 1:, :] - displacement[:-1, 1:, 1:, :])*self._pixel_spacing[0]
         dy = th.abs(displacement[1:, 1:, 1:, :] - displacement[1:, :-1, 1:, :])*self._pixel_spacing[1]
         dz = th.abs(displacement[1:, 1:, 1:, :] - displacement[1:, 1:, :-1, :])*self._pixel_spacing[2]
 
-        return dx + dy + dz
+        return self._mask_3d(F.pad(dx + dy + dz, (0, 1, 0, 1, 0, 1)))
 
     def forward(self, displacement):
         return self.return_loss(self._regulariser(displacement))
@@ -125,14 +147,14 @@ class DiffusionRegulariser(_Regulariser):
         dx = (displacement[1:, 1:, :] - displacement[:-1, 1:, :]).pow(2) * self._pixel_spacing[0]
         dy = (displacement[1:, 1:, :] - displacement[1:, :-1, :]).pow(2) * self._pixel_spacing[1]
 
-        return dx + dy
+        self._mask_2d(F.pad(dx + dy, (0, 1, 0, 1)))
 
     def _l2_regulariser_3d(self, displacement):
         dx = (displacement[1:, 1:, 1:, :] - displacement[:-1, 1:, 1:, :]).pow(2) * self._pixel_spacing[0]
         dy = (displacement[1:, 1:, 1:, :] - displacement[1:, :-1, 1:, :]).pow(2) * self._pixel_spacing[1]
         dz = (displacement[1:, 1:, 1:, :] - displacement[1:, 1:, :-1, :]).pow(2) * self._pixel_spacing[2]
 
-        return dx + dy + dz
+        return self._mask_3d(F.pad(dx + dy + dz, (0, 1, 0, 1, 0, 1)))
 
     def forward(self, displacement):
         return self.return_loss(self._regulariser(displacement))

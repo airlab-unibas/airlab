@@ -28,6 +28,10 @@ class _ParameterRegulariser(th.nn.modules.Module):
         self._parameter_name = parameter_name
 
     def SetWeight(self, weight):
+        print("SetWeight is deprecated. Use set_weight instead.")
+        self.set_weight(weight)
+
+    def set_weight(self, weight):
         self._weight = weight
 
     # conditional return
@@ -83,7 +87,7 @@ class IsotropicTVRegulariser(_SpatialParameterRegulariser):
                 dx = (parameter[:, 1:, 1:] - parameter[:, :-1, 1:]).pow(2)*self._scaling[0]
                 dy = (parameter[:, 1:, 1:] - parameter[:,  1:, :-1]).pow(2)*self._scaling[1]
 
-                return th.sqrt(dx + dy + 1e-7)
+                return dx + dy
 
     def _regulariser_3d(self, parameters):
         for name, parameter in parameters:
@@ -92,10 +96,17 @@ class IsotropicTVRegulariser(_SpatialParameterRegulariser):
                 dy = (parameter[:, 1:, 1:, 1:] - parameter[:, 1:, :-1, 1:]).pow(2)*self._scaling[1]
                 dz = (parameter[:, 1:, 1:, 1:] - parameter[:, 1:, 1:, :-1]).pow(2)*self._scaling[2]
 
-                return th.sqrt(dx + dy + dz + 1e-7)
+                return dx + dy + dz
 
     def forward(self, parameters):
-        return self.return_loss(self._regulariser(parameters))
+
+        # set the supgradient to zeros
+        value = self._regulariser(parameters)
+        mask = value > 0
+        value[mask] = th.sqrt(value[mask])
+
+        return self.return_loss(value)
+
 
 """
     TV regularisation 
