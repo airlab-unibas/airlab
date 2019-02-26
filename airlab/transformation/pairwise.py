@@ -188,6 +188,32 @@ class RigidTransformation(_Transformation):
             fixed_image_center_mass_z = th.sum(fixed_image.image.squeeze() * self._grid[..., 2]) / intensity_sum
             self._t_z = Parameter(self._center_mass_z - fixed_image_center_mass_z)
 
+    def set_parameters(self, t, phi, rotation_center=None):
+        """
+        Set parameters manually
+
+        t (array): 2 or 3 dimensional array specifying the spatial translation
+        phi (array): 1 or 3 dimensional array specifying the rotation angles
+        rotation_center (array): 2 or 3 dimensional array specifying the rotation center (default is zeros)
+        """
+        self._t_x = Parameter(th.tensor(t[0]).to(dtype=self._dtype, device=self._device))
+        self._t_y = Parameter(th.tensor(t[1]).to(dtype=self._dtype, device=self._device))
+        self._phi_z = Parameter(th.tensor(phi[0]).to(dtype=self._dtype, device=self._device))
+
+        if not rotation_center is None:
+            self._center_mass_x = rotation_center[0]
+            self._center_mass_y = rotation_center[1]
+
+        if len(t) == 2:
+            self._compute_transformation_2d()
+        else:
+            self._t_z = Parameter(th.tensor(t[2]).to(dtype=self._dtype, device=self._device))
+            self._phi_x = Parameter(th.tensor(phi[1]).to(dtype=self._dtype, device=self._device))
+            self._phi_y = Parameter(th.tensor(phi[2]).to(dtype=self._dtype, device=self._device))
+            self._center_mass_z = rotation_center[1]
+            self._compute_transformation_3d()
+
+
     def _compute_transformation_2d(self):
 
         self._trans_matrix_pos = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
@@ -278,6 +304,26 @@ class SimilarityTransformation(RigidTransformation):
 
             self._scale_z = Parameter(th.tensor(1.0))
 
+    def set_parameters(self, t, phi, scale, rotation_center=None):
+        """
+        Set parameters manually
+
+        t (array): 2 or 3 dimensional array specifying the spatial translation
+        phi (array): 1 or 3 dimensional array specifying the rotation angles
+        scale (array): 2 or 3 dimensional array specifying the scale in each dimension
+        rotation_center (array): 2 or 3 dimensional array specifying the rotation center (default is zeros)
+        """
+        super(SimilarityTransformation, self).set_parameters(t, phi, rotation_center)
+
+        self._scale_x = Parameter(th.tensor(scale[0]).to(dtype=self._dtype, device=self._device))
+        self._scale_y = Parameter(th.tensor(scale[1]).to(dtype=self._dtype, device=self._device))
+
+        if len(t) == 2:
+            self._compute_transformation_2d()
+        else:
+            self._scale_z = Parameter(th.tensor(scale[2]).to(dtype=self._dtype, device=self._device))
+            self._compute_transformation_3d()
+
     def _compute_transformation_2d(self):
 
         super(SimilarityTransformation, self)._compute_transformation_2d()
@@ -324,46 +370,70 @@ class AffineTransformation(SimilarityTransformation):
     def __init__(self, moving_image, opt_cm=False):
         super(AffineTransformation, self).__init__(moving_image, opt_cm)
 
-        self._share_y_x = Parameter(th.tensor(0.0))
-        self._share_x_y = Parameter(th.tensor(0.0))
+        self._shear_y_x = Parameter(th.tensor(0.0))
+        self._shear_x_y = Parameter(th.tensor(0.0))
 
-        self._share_matrix = None
+        self._shear_matrix = None
 
         if self._dim == 2:
             self._compute_displacement = self._compute_transformation_2d
         else:
             self._compute_displacement = self._compute_transformation_3d
 
-            self._share_z_x = Parameter(th.tensor(0.0))
-            self._share_z_y = Parameter(th.tensor(0.0))
-            self._share_x_z = Parameter(th.tensor(0.0))
-            self._share_y_z = Parameter(th.tensor(0.0))
+            self._shear_z_x = Parameter(th.tensor(0.0))
+            self._shear_z_y = Parameter(th.tensor(0.0))
+            self._shear_x_z = Parameter(th.tensor(0.0))
+            self._shear_y_z = Parameter(th.tensor(0.0))
+
+    def set_parameters(self, t, phi, scale, shear, rotation_center=None):
+        """
+        Set parameters manually
+
+        t (array): 2 or 3 dimensional array specifying the spatial translation
+        phi (array): 1 or 3 dimensional array specifying the rotation angles
+        scale (array): 2 or 3 dimensional array specifying the scale in each dimension
+        shear (array): 2 or 6 dimensional array specifying the shear in each dimension: yx, xy, zx, zy, xz, yz
+        rotation_center (array): 2 or 3 dimensional array specifying the rotation center (default is zeros)
+        """
+        super(AffineTransformation, self).set_parameters(t, phi, scale, rotation_center)
+
+        self._shear_y_x = Parameter(th.tensor(shear[0]).to(dtype=self._dtype, device=self._device))
+        self._shear_x_y = Parameter(th.tensor(shear[1]).to(dtype=self._dtype, device=self._device))
+
+        if len(t) == 2:
+            self._compute_transformation_2d()
+        else:
+            self._shear_z_x = Parameter(th.tensor(shear[2]).to(dtype=self._dtype, device=self._device))
+            self._shear_z_y = Parameter(th.tensor(shear[3]).to(dtype=self._dtype, device=self._device))
+            self._shear_x_z = Parameter(th.tensor(shear[4]).to(dtype=self._dtype, device=self._device))
+            self._shear_y_z = Parameter(th.tensor(shear[5]).to(dtype=self._dtype, device=self._device))
+            self._compute_transformation_3d()
 
     def _compute_transformation_2d(self):
 
         super(AffineTransformation, self)._compute_transformation_2d()
 
-        self._share_matrix = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
+        self._shear_matrix = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
 
-        self._share_matrix[0, 1] = self._share_y_x
-        self._share_matrix[1, 0] = self._share_x_y
+        self._shear_matrix[0, 1] = self._shear_y_x
+        self._shear_matrix[1, 0] = self._shear_x_y
 
     def _compute_transformation_3d(self):
 
         super(AffineTransformation, self)._compute_transformation_3d()
 
-        self._share_matrix = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
+        self._shear_matrix = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
 
-        self._share_matrix[0, 1] = self._share_y_x
-        self._share_matrix[0, 2] = self._share_z_x
-        self._share_matrix[1, 0] = self._share_x_y
-        self._share_matrix[1, 2] = self._share_z_y
-        self._share_matrix[2, 0] = self._share_x_z
-        self._share_matrix[2, 1] = self._share_y_z
+        self._shear_matrix[0, 1] = self._shear_y_x
+        self._shear_matrix[0, 2] = self._shear_z_x
+        self._shear_matrix[1, 0] = self._shear_x_y
+        self._shear_matrix[1, 2] = self._shear_z_y
+        self._shear_matrix[2, 0] = self._shear_x_z
+        self._shear_matrix[2, 1] = self._shear_y_z
 
     def _compute_transformation_matrix(self):
         transformation_matrix = th.mm(th.mm(th.mm(th.mm(th.mm(self._trans_matrix_pos, self._trans_matrix_cm),
-                                                        self._rotation_matrix),self._scale_matrix), self._share_matrix),
+                                                        self._rotation_matrix),self._scale_matrix), self._shear_matrix),
                                       self._trans_matrix_cm_rw)[0:self._dim, :]
 
         return transformation_matrix
@@ -546,6 +616,15 @@ class BsplineTransformation(_KernelTransformation):
     Wendland kernel transformation
 """
 class WendlandKernelTransformation(_KernelTransformation):
+    """
+    Wendland Kernel Transform:
+
+    Implements the kernel transform with the Wendland basis
+
+    Parameters:
+        sigma: specifies how many control points are used (each sigma pixels)
+        cp_scale: specifies the extent of the kernel. how many control points are in the support of the kernel
+    """
     def __init__(self, image_size, sigma, cp_scale=2, diffeomorphic=False, ktype="C4", dtype=th.float32, device='cpu'):
         super(WendlandKernelTransformation, self).__init__(image_size, diffeomorphic, dtype, device)
 
