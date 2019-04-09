@@ -147,7 +147,7 @@ class DiffusionRegulariser(_Regulariser):
         dx = (displacement[1:, 1:, :] - displacement[:-1, 1:, :]).pow(2) * self._pixel_spacing[0]
         dy = (displacement[1:, 1:, :] - displacement[1:, :-1, :]).pow(2) * self._pixel_spacing[1]
 
-        self._mask_2d(F.pad(dx + dy, (0, 1, 0, 1)))
+        return self._mask_2d(F.pad(dx + dy, (0, 1, 0, 1)))
 
     def _l2_regulariser_3d(self, displacement):
         dx = (displacement[1:, 1:, 1:, :] - displacement[:-1, 1:, 1:, :]).pow(2) * self._pixel_spacing[0]
