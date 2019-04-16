@@ -116,7 +116,7 @@ class TVRegulariser(_Regulariser):
         dx = th.abs(displacement[1:, 1:, :] - displacement[:-1, 1:, :])*self._pixel_spacing[0]
         dy = th.abs(displacement[1:, 1:, :] - displacement[1:, :-1, :])*self._pixel_spacing[1]
 
-        self._mask_2d(F.pad(dx + dy, (0, 1, 0, 1)))
+        return self._mask_2d(F.pad(dx + dy, (0, 1, 0, 1)))
 
     def _TV_regulariser_3d(self, displacement):
         dx = th.abs(displacement[1:, 1:, 1:, :] - displacement[:-1, 1:, 1:, :])*self._pixel_spacing[0]
