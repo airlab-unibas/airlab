@@ -17,6 +17,7 @@ import torch as th
 import multiprocessing as mp
 import SimpleITK as sitk
 from .image import Image
+from .image import create_image_from_image
 
 """
 Create a two dimensional coordinate grid
@@ -126,6 +127,9 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
         if compute_masks:
             f_mask = th.ones_like(fixed_image.image)
             m_mask = th.ones_like(moving_image.image)
+
+            f_mask = Image(f_mask, fixed_image.size, fixed_image.spacing, fixed_image.origin)
+            m_mask = Image(m_mask, moving_image.size, moving_image.spacing, moving_image.origin)
         return fixed_image, f_mask, moving_image, m_mask, None
 
     # common origin
