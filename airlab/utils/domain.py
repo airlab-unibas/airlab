@@ -126,7 +126,7 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
         if compute_masks:
             f_mask = th.ones_like(fixed_image.image)
             m_mask = th.ones_like(moving_image.image)
-        return fixed_image, f_mask, moving_image, m_mask
+        return fixed_image, f_mask, moving_image, m_mask, None
 
     # common origin
     origin = np.minimum(fixed_image.origin, moving_image.origin)
