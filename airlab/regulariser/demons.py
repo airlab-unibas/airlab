@@ -62,16 +62,16 @@ class GaussianRegulariser(_DemonsRegulariser):
 
     def _regularise_2d(self, data):
 
-        data.data.unsqueeze_(0)
+        data.data = data.data.unsqueeze(0)
         data.data = F.conv2d(data.data, self._kernel.contiguous(), padding=self._padding, groups=2)
-        data.data.squeeze_()
+        data.data = data.data.squeeze()
 
 
     def _regularise_3d(self, data):
 
-        data.data.unsqueeze_(0)
+        data.data = data.data.unsqueeze(0)
         data.data = F.conv3d(data.data, self._kernel, padding=self._padding, groups=3)
-        data.data.squeeze_()
+        data.data = data.data.squeeze()
 
     def regularise(self, data):
         for parameter in data:

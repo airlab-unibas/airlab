@@ -65,24 +65,24 @@ def upsample_displacement(displacement, new_size, interpolation="linear"):
     """
     dim = displacement.size()[-1]
     if dim == 2:
-        displacement = th.transpose(displacement.unsqueeze_(0), 0, 3).unsqueeze_(0)
+        displacement = th.transpose(displacement.unsqueeze(0), 0, 3).unsqueeze(0)
         if interpolation == 'linear':
             interpolation = 'bilinear'
         else:
             interpolation = 'nearest'
     elif dim == 3:
-        displacement = th.transpose(displacement.unsqueeze_(0), 0, 4).unsqueeze_(0)
+        displacement = th.transpose(displacement.unsqueeze(0), 0, 4).unsqueeze(0)
         if interpolation == 'linear':
             interpolation = 'trilinear'
         else:
             interpolation = 'nearest'
 
-    upsampled_displacement = F.interpolate(displacement[...,0], size=new_size, mode=interpolation, align_corners=False)
+    upsampled_displacement = F.interpolate(displacement[..., 0], size=new_size, mode=interpolation, align_corners=False)
 
     if dim == 2:
-        upsampled_displacement = th.transpose(upsampled_displacement.unsqueeze_(-1), 1, -1)
+        upsampled_displacement = th.transpose(upsampled_displacement.unsqueeze(-1), 1, -1)
     elif dim == 3:
-        upsampled_displacement = th.transpose(upsampled_displacement.unsqueeze_(-1), 1, -1)
+        upsampled_displacement = th.transpose(upsampled_displacement.unsqueeze(-1), 1, -1)
 
     return upsampled_displacement[0, 0, ...]
 

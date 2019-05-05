@@ -37,7 +37,7 @@ def main():
 
     # In order to use a GPU uncomment the following line. The number is the device index of the used GPU
     # Here, the GPU with the index 0 is used.
-    device = th.device("cuda:0")
+    # device = th.device("cuda:0")
 
     # create test image data
     fixed_image, moving_image, shaded_image = create_C_2_O_test_images(256, dtype=dtype, device=device)

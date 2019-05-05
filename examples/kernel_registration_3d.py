@@ -28,11 +28,11 @@ def main():
     # set the used data type
     dtype = th.float32
     # set the device for the computaion to CPU
-    #device = th.device("cpu")
+    device = th.device("cpu")
 
     # In order to use a GPU uncomment the following line. The number is the device index of the used GPU
     # Here, the GPU with the index 0 is used.
-    device = th.device("cuda:0")
+    # device = th.device("cuda:0")
 
     # directory to store results
     tmp_directory = "/tmp/"

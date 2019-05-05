@@ -53,10 +53,10 @@ class Image:
         """
 
         # distinguish between numpy array and torch tensors
-        if type(tensor_image)==np.ndarray:
-            self.image = th.from_numpy(tensor_image).squeeze_().unsqueeze_(0).unsqueeze_(0)
-        elif type(tensor_image)==th.Tensor:
-            self.image = tensor_image.squeeze_().unsqueeze_(0).unsqueeze_(0)
+        if type(tensor_image) == np.ndarray:
+            self.image = th.from_numpy(tensor_image).squeeze().unsqueeze(0).unsqueeze(0)
+        elif type(tensor_image) == th.Tensor:
+            self.image = tensor_image.squeeze().unsqueeze(0).unsqueeze(0)
         else:
             raise Exception("A numpy ndarray or a torch tensor was expected as argument. Got " + str(type(tensor_image)))
 
@@ -80,7 +80,7 @@ class Image:
         return (Image): an airlab image object
         """
         if type(sitk_image)==sitk.SimpleITK.Image:
-            self.image = th.from_numpy(sitk.GetArrayFromImage(sitk_image)).unsqueeze_(0).unsqueeze_(0)
+            self.image = th.from_numpy(sitk.GetArrayFromImage(sitk_image)).unsqueeze(0).unsqueeze(0)
             self.size = sitk_image.GetSize()
             self.spacing = sitk_image.GetSpacing()
             self.origin = sitk_image.GetOrigin()
@@ -165,8 +165,8 @@ class Image:
         Note: the method is inplace
         """
         # reverse order of axis to follow the convention of SimpleITK
-        self.image = self.image.squeeze_().permute(tuple(reversed(range(self.ndim))))
-        self.image.unsqueeze_(0).unsqueeze_(0)
+        self.image = self.image.squeeze().permute(tuple(reversed(range(self.ndim))))
+        self.image = self.image.unsqueeze(0).unsqueeze(0)
 
 
 """
@@ -191,7 +191,7 @@ class Displacement(Image):
         # flip axis to
         df = Displacement(self.image.clone(), self.size, self.spacing, self.origin)
         df._reverse_axis()
-        df.image.squeeze_()
+        df.image = df.image.squeeze()
         df.image = df.image.cpu()
 
         if len(self.size) == 2:
@@ -221,7 +221,7 @@ class Displacement(Image):
         order.append(len(order))
         self.image = self.image.squeeze_().permute(tuple(order))
         self.image = flip(self.image, self.ndim-1)
-        self.image.unsqueeze_(0).unsqueeze_(0)
+        self.image = self.image.unsqueeze(0).unsqueeze(0)
 
 
     @staticmethod
@@ -271,7 +271,7 @@ def create_image_from_image(tensor_image, image):
     Convert numpy image to AirlLab image format
 """
 def image_from_numpy(image, pixel_spacing, image_origin, dtype=th.float32, device='cpu'):
-    tensor_image = th.from_numpy(image).unsqueeze_(0).unsqueeze_(0)
+    tensor_image = th.from_numpy(image).unsqueeze(0).unsqueeze(0)
     tensor_image = tensor_image.to(dtype=dtype, device=device)
     return Image(tensor_image, image.shape, pixel_spacing, image_origin)
 
@@ -305,7 +305,7 @@ def create_tensor_image_from_itk_image(itk_image, dtype=th.float32, device='cpu'
     if len(image_size) != image_dim:
         image_spacing = image_spacing[0:len(image_size)]
 
-    tensor_image = th.tensor(np_image, dtype=dtype, device=device).unsqueeze_(0).unsqueeze_(0)
+    tensor_image = th.tensor(np_image, dtype=dtype, device=device).unsqueeze(0).unsqueeze(0)
 
 
     return Image(tensor_image, image_size, image_spacing, image_origin)
@@ -324,7 +324,7 @@ def create_image_pyramid(image, down_sample_factor):
 
             kernel = kernelFunction.gaussian_kernel_2d(sigma.numpy(), asTensor=True)
             padding = np.array([(x - 1)/2 for x in kernel.size()], dtype=int).tolist()
-            kernel.unsqueeze_(0).unsqueeze_(0)
+            kernel = kernel.unsqueeze(0).unsqueeze(0)
             kernel = kernel.to(dtype=image.dtype, device=image.device)
 
             image_sample = F.conv2d(image.image, kernel, stride=level, padding=padding)
@@ -340,7 +340,7 @@ def create_image_pyramid(image, down_sample_factor):
 
             kernel = kernelFunction.gaussian_kernel_3d(sigma.numpy(), asTensor=True)
             padding = np.array([(x - 1) / 2 for x in kernel.size()], dtype=int).tolist()
-            kernel.unsqueeze_(0).unsqueeze_(0)
+            kernel = kernel.unsqueeze(0).unsqueeze(0)
             kernel = kernel.to(dtype=image.dtype, device=image.device)
 
             image_sample = F.conv3d(image.image, kernel, stride=level, padding=padding)
