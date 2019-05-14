@@ -8,7 +8,7 @@ for rapid prototyping and reproduction of registration algorithms. The unique fe
 is transparent.
 AirLab is implemented in Python using [PyTorch](https://pytorch.org/) as tensor and optimization library and SimpleITK for basic image IO. It profits therefore from recent advances made by the machine learning community.
 
-AirLab is not meant to replace existing registration frameworks nor it implements deep learning methods only. It is rather a laboratory for image registration algorithms for rapid prototyping and reproduction. Furthermore, it borrows key functionality from PyTorch (autograd and optimization) which is of course not limitted to deep learning methods.
+AirLab is not meant to replace existing registration frameworks nor it implements deep learning methods only. It is rather a laboratory for image registration algorithms for rapid prototyping and reproduction. Furthermore, it borrows key functionality from PyTorch (autograd and optimization) which is of course not limited to deep learning methods.
 
 We refer to our arXiv preprint [2018](https://arxiv.org/abs/1806.09907) for a detailed introduction of AirLab and its feature.
 
@@ -70,5 +70,5 @@ We deeply appreciate the help of the following people:
 * Benjamin Sugerman
 
 ### Other Open Source Projects
-AirLab depends on several thirdparty open source project which are included as library. For details, consider the NOTICE file.
+AirLab depends on several third party open source project which are included as library. For details, consider the `NOTICE` file.
 
