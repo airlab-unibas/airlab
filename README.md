@@ -49,7 +49,7 @@ The project started in the [Center for medical Image Analysis & Navigation](http
 ##### Authors and Contributors
 * **Robin Sandkuehler** - *initial work* _(robin.sandkuehler@unibas.ch)_
 * **Christoph Jud** - *initial work* _(christoph.jud@unibas.ch)_
-* **Simon Andermatt - *project support*
+* **Simon Andermatt** - *project support*
 * **Alina Giger** - *presentation support*
 * **Reinhard Wendler** - *logo design support*
 * **Philippe C. Cattin** - *project support*
