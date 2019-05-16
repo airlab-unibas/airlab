@@ -49,6 +49,7 @@ The project started in the [Center for medical Image Analysis & Navigation](http
 ##### Authors and Contributors
 * **Robin Sandkuehler** - *initial work* _(robin.sandkuehler@unibas.ch)_
 * **Christoph Jud** - *initial work* _(christoph.jud@unibas.ch)_
+* **Simon Andermatt - *project support*
 * **Alina Giger** - *presentation support*
 * **Reinhard Wendler** - *logo design support*
 * **Philippe C. Cattin** - *project support*
@@ -59,7 +60,7 @@ AirLab is licensed under the Apache 2.0 license. For details, consider the LICEN
 
 If you can use this software in any way, please cite us in your publications:
 
-[2018] Robin Sandkuehler,  Christoph Jud, and Philippe C. Cattin. "AirLab: Autograd Image Registration Laboratory". arXiv preprint arXiv:1806.09907, 2018. [link](https://arxiv.org/abs/1806.09907)
+[2018] Robin Sandkuehler,  Christoph Jud, Simon Andermatt, and Philippe C. Cattin. "AirLab: Autograd Image Registration Laboratory". arXiv preprint arXiv:1806.09907, 2018. [link](https://arxiv.org/abs/1806.09907)
 
 
 ### Contributing
