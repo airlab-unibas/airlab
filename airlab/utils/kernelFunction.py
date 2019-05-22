@@ -223,9 +223,9 @@ def bspline_kernel_1d(sigma, order=2, asTensor=False, dtype=th.float32, device='
     padding = sigma - 1
 
     for i in range(1, order + 1):
-        kernel = F.conv1d(kernel, kernel_ones, padding=padding)
+        kernel = F.conv1d(kernel, kernel_ones, padding=padding)/sigma
 	
-    kernel = kernel / kernel.sum()
+
 
     if asTensor:
         return kernel[0, 0, ...].to(dtype=dtype, device=device)
@@ -242,9 +242,9 @@ def bspline_kernel_2d(sigma=[1, 1], order=2, asTensor=False, dtype=th.float32, d
     padding = np.array(sigma) - 1
 
     for i in range(1, order + 1):
-        kernel = F.conv2d(kernel, kernel_ones, padding=(padding).tolist())
+        kernel = F.conv2d(kernel, kernel_ones, padding=(padding).tolist())/(sigma[0]*sigma[1])
     
-    kernel = kernel / kernel.sum()
+
 
     if asTensor:
         return kernel[0, 0, ...].to(dtype=dtype, device=device)
@@ -261,9 +261,9 @@ def bspline_kernel_3d(sigma=[1, 1, 1], order=2, asTensor=False, dtype=th.float32
     padding = np.array(sigma) - 1
 
     for i in range(1, order + 1):
-        kernel = F.conv3d(kernel, kernel_ones, padding=(padding).tolist())
+        kernel = F.conv3d(kernel, kernel_ones, padding=(padding).tolist())/(sigma[0]*sigma[1]*sigma[2])
 	
-    kernel = kernel / kernel.sum()
+
 
     if asTensor:
         return kernel[0, 0, ...].to(dtype=dtype, device=device)
