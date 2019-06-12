@@ -187,6 +187,10 @@ class RigidTransformation(_Transformation):
         if self._dim == 3:
             fixed_image_center_mass_z = th.sum(fixed_image.image.squeeze() * self._grid[..., 2]) / intensity_sum
             self._t_z = Parameter(self._center_mass_z - fixed_image_center_mass_z)
+            
+    @property
+    def transformation_matrix(self):
+        return self._compute_transformation_matrix()
 
     def set_parameters(self, t, phi, rotation_center=None):
         """
@@ -200,7 +204,7 @@ class RigidTransformation(_Transformation):
         self._t_y = Parameter(th.tensor(t[1]).to(dtype=self._dtype, device=self._device))
         self._phi_z = Parameter(th.tensor(phi[0]).to(dtype=self._dtype, device=self._device))
 
-        if not rotation_center is None:
+        if rotation_center is not None:
             self._center_mass_x = rotation_center[0]
             self._center_mass_y = rotation_center[1]
 
@@ -210,7 +214,9 @@ class RigidTransformation(_Transformation):
             self._t_z = Parameter(th.tensor(t[2]).to(dtype=self._dtype, device=self._device))
             self._phi_x = Parameter(th.tensor(phi[1]).to(dtype=self._dtype, device=self._device))
             self._phi_y = Parameter(th.tensor(phi[2]).to(dtype=self._dtype, device=self._device))
-            self._center_mass_z = rotation_center[1]
+            if rotation_center is not None:
+                self._center_mass_z = rotation_center[1]
+                
             self._compute_transformation_3d()
 
 
@@ -272,6 +278,9 @@ class RigidTransformation(_Transformation):
     def print(self):
         for name, param in self.named_parameters():
             print(name, param.item())
+            
+    def compute_displacement(self, transformation_matrix):
+        return self._compute_dense_flow(transformation_matrix)
 
     def forward(self):
 
@@ -280,6 +289,8 @@ class RigidTransformation(_Transformation):
         flow = self._compute_dense_flow(transformation_matrix)
 
         return self._concatenate_flows(flow)
+    
+    
 
 
 class SimilarityTransformation(RigidTransformation):
