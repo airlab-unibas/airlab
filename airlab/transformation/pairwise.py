@@ -138,7 +138,6 @@ class RigidTransformation(_Transformation):
         self._center_mass_x = th.sum(moving_image.image.squeeze() * self._grid[..., 0]) / intensity_sum
         self._center_mass_y = th.sum(moving_image.image.squeeze() * self._grid[..., 1]) / intensity_sum
 
-        print(self._center_mass_x, self._center_mass_y)
 
         self._phi_z = Parameter(th.tensor(0.0))
         self._t_x = Parameter(th.tensor(0.0))
