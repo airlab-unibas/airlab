@@ -2,6 +2,13 @@
 
 <img width="10%" align="middle" src="https://readthedocs.org/projects/airlab/badge/?version=latest&style=plastic" alt="docs status" />
 
+##
+<a href="https://airlab-unibas.github.io/MICCAITutorial2019/">
+<img width="100%" align="middle" src="https://www.miccai2019.org/wp-content/uploads/2018/10/Web-Header.png" alt="miccai" /></a>
+
+Check out our AIRLab tutorial taking place at MICCAI 2019 in Shenzen: https://airlab-unibas.github.io/MICCAITutorial2019/
+See you in Shenzen 
+
 # Autograd Image Registration Laboratory
 AirLab is an open laboratory for medical image registration. It provides an environment
 for rapid prototyping and reproduction of registration algorithms. The unique feature of AirLab is, that the analytic gradients of the objective function are computed automatically with fosters rapid prototyping. In addition, the device on which the computations are performed, on a CPU or a GPU,
