@@ -7,7 +7,7 @@
 <img width="100%" align="middle" src="https://www.miccai2019.org/wp-content/uploads/2018/10/Web-Header.png" alt="miccai" /></a>
 
 Check out our AIRLab tutorial taking place at MICCAI 2019 in Shenzhen: https://airlab-unibas.github.io/MICCAITutorial2019/
-See you in Shenzen.
+See you in Shenzhen.
 
 # Autograd Image Registration Laboratory
 AirLab is an open laboratory for medical image registration. It provides an environment
