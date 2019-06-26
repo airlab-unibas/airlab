@@ -6,7 +6,7 @@
 <a href="https://airlab-unibas.github.io/MICCAITutorial2019/">
 <img width="100%" align="middle" src="https://www.miccai2019.org/wp-content/uploads/2018/10/Web-Header.png" alt="miccai" /></a>
 
-Check out our AIRLab tutorial taking place at MICCAI 2019 in Shenzen: https://airlab-unibas.github.io/MICCAITutorial2019/
+Check out our AIRLab tutorial taking place at MICCAI 2019 in Shenzhen: https://airlab-unibas.github.io/MICCAITutorial2019/
 See you in Shenzen.
 
 # Autograd Image Registration Laboratory
