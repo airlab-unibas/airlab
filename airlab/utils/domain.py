@@ -144,7 +144,7 @@ def get_joint_domain_images(fixed_image, moving_image, default_value=0, interpol
     spacing = np.minimum(fixed_image.spacing, moving_image.spacing)
 
     # common size
-    size = np.ceil((extent-origin)/spacing).astype(int)
+    size = np.ceil(((extent-origin)/spacing)+1).astype(int)
 
     # Resample images
     # fixed and moving image are resampled in new domain
