@@ -276,7 +276,7 @@ class MI(_PairwiseImageLoss):
     r""" Implementation of the Mutual Information image loss.
 
          .. math::
-            \mathcal{S}_{\text{MI}} := H(F, M) - H(F|M) - H(M|F)
+            \mathcal{S}_{\text{MI}} := H(F) + H(M) - H(F, M)
 
         Args:
             fixed_image (Image): Fixed image for the registration
