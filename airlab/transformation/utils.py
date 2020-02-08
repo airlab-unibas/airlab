@@ -117,7 +117,7 @@ def displacement_to_unit_displacement(displacement):
 """
     Convert a unit displacement to a  itk like displacement
 """
-def unit_displacement_to_dispalcement(displacement):
+def unit_displacement_to_displacement(displacement):
     # scale displacements from 2square
     # domain to image domain
     # - last dimension are displacements
