@@ -188,7 +188,7 @@ class NCC(_PairwiseImageLoss):
     Local Normaliced Cross Corelation Image Loss
 """
 class LCC(_PairwiseImageLoss):
-    def __init__(self, fixed_image, moving_image,fixed_mask=None, moving_mask=None, sigma=3, kernel_type="box", size_average=True, reduce=True):
+    def __init__(self, fixed_image, moving_image,fixed_mask=None, moving_mask=None, sigma=[3], kernel_type="box", size_average=True, reduce=True):
         super(LCC, self).__init__(fixed_image, moving_image, fixed_mask, moving_mask,  size_average, reduce)
 
         self._name = "lcc"
