@@ -259,8 +259,25 @@ class RigidTransformation(_Transformation):
         self._trans_matrix_cm_rw[1, 3] = self._center_mass_y
         self._trans_matrix_cm_rw[2, 3] = self._center_mass_z
 
-        self._rotation_matrix = tu.rotation_matrix(self._phi_x, self._phi_y,
-                                                   self._phi_z, dtype=self._dtype, device=self._device, homogene=True)
+        R_x = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
+        R_x[1, 1] = th.cos(self._phi_x)
+        R_x[1, 2] = -th.sin(self._phi_x)
+        R_x[2, 1] = th.sin(self._phi_x)
+        R_x[2, 2] = th.cos(self._phi_x)
+
+        R_y = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
+        R_y[0, 0] = th.cos(self._phi_y)
+        R_y[0, 2] = th.sin(self._phi_y)
+        R_y[2, 0] = -th.sin(self._phi_y)
+        R_y[2, 2] = th.cos(self._phi_y)
+
+        R_z = th.diag(th.ones(self._dim + 1, dtype=self._dtype, device=self._device))
+        R_z[0, 0] = th.cos(self._phi_z)
+        R_z[0, 1] = -th.sin(self._phi_z)
+        R_z[1, 0] = th.sin(self._phi_z)
+        R_z[1, 1] = th.cos(self._phi_z)
+        
+        self._rotation_matrix = th.mm(th.mm(R_z, R_y), R_x)
 
     def _compute_transformation_matrix(self):
         transformation_matrix = th.mm(th.mm(th.mm(self._trans_matrix_pos, self._trans_matrix_cm),
