@@ -53,9 +53,9 @@ Create a one dimensional gaussian kernel matrix
 """
 def gaussian_kernel_1d(sigma, asTensor=False, dtype=th.float32, device='cpu'):
 
-    kernel_size = 2*np.ceil(sigma*2) + 1
+    kernel_size = int(2*np.ceil(sigma*2) + 1)
 
-    x = np.linspace(-(kernel_size - 1) / 2, (kernel_size - 1) / 2, num=kernel_size)
+    x = np.linspace(-(kernel_size - 1) // 2, (kernel_size - 1) // 2, num=kernel_size)
 
     kernel = 1.0/(sigma*np.sqrt(2*np.pi))*np.exp(-(x**2)/(2*sigma**2))
     kernel = kernel/np.sum(kernel)
