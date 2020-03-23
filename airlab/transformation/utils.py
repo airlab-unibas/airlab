@@ -110,20 +110,33 @@ def displacement_to_unit_displacement(displacement):
     # scale displacements from image
     # domain to 2square
     # - last dimension are displacements
-    for dim in range(displacement.shape[-1]):
-        displacement[..., dim] = 2.0 * displacement[..., dim] / float(displacement.shape[-dim - 2] - 1)
+    if type(displacement) == iutils.Displacement:
+        df = displacement.image
+    else:
+        df = displacement
+
+    for dim in range(df.shape[-1]):
+        df[..., dim] = 2.0 * df[..., dim] / float(df.shape[-dim - 2] - 1)
+
     return displacement
 
 
 """
-    Convert a unit displacement to a  itk like displacement
+    Convert a unit displacement to a displacement field with the right spacing/scale
 """
 def unit_displacement_to_displacement(displacement):
     # scale displacements from 2square
     # domain to image domain
     # - last dimension are displacements
-    for dim in range(displacement.shape[-1]):
-        displacement[..., dim] = float(displacement.shape[-dim - 2] - 1) * displacement[..., dim] / 2.0
+    if type(displacement) == iutils.Displacement:
+        df = displacement.image
+    else:
+        df = displacement
+
+    # manipulate displacement field
+    for dim in range(df.shape[-1]):
+        df[..., dim] = float(df.shape[-dim - 2] - 1) * df[..., dim] / 2.0
+
     return displacement
 
 def get_displacement_itk(displacement, refIm):
