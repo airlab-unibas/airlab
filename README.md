@@ -2,12 +2,7 @@
 
 <img width="10%" align="middle" src="https://readthedocs.org/projects/airlab/badge/?version=latest&style=plastic" alt="docs status" />
 
-##
-<a href="https://airlab-unibas.github.io/MICCAITutorial2019/">
-<img width="100%" align="middle" src="https://www.miccai2019.org/wp-content/uploads/2018/10/Web-Header.png" alt="miccai" /></a>
 
-Check out our AIRLab tutorial taking place at MICCAI 2019 in Shenzhen: https://airlab-unibas.github.io/MICCAITutorial2019/
-See you in Shenzhen.
 
 # Autograd Image Registration Laboratory
 AirLab is an open laboratory for medical image registration. It provides an environment
@@ -60,6 +55,13 @@ The project started in the [Center for medical Image Analysis & Navigation](http
 * **Alina Giger** - *presentation support*
 * **Reinhard Wendler** - *logo design support*
 * **Philippe C. Cattin** - *project support*
+
+
+## Tutorial
+<a href="https://airlab-unibas.github.io/MICCAITutorial2019/">
+<img width="100%" align="middle" src="https://www.miccai2019.org/wp-content/uploads/2018/10/Web-Header.png" alt="miccai" /></a>
+
+Check out our AIRLab tutorial at MICCAI 2019 in Shenzhen: https://airlab-unibas.github.io/MICCAITutorial2019/
 
 
 ## License
