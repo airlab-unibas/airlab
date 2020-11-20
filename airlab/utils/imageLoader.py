@@ -30,22 +30,16 @@ class ImageLoader(object):
     The downloaded images are cached in a temporary folder, such that, if the image is loaded twice, it will be taken
     from that folder. If landmark points are available too, they are downloaded and cached as well. The class is
     implemented as singleton in order to hold a database of cached images only once and consistent.
-
     Using the show() method, one can print the different images which can be loaded. They are grouped into subjects
     and images. For example: 4DCT_POPI_2 image_30 means, the subject 4DCT_POPI_2 and the third image of the respiratory
     cycle.
-
     Usage:
     loader = ImageLoader("/tmp/")
     (image, points) = loader.load("4DCT_POPI_2", "image_30")
-
     If no landmark points are defined, points is set to None.
-
     In the generate_database() other images can be registered to the database.
-
     Note: the provided publicly available images have been published for research purposes. If you are using them for
           your research, please cite the authors appropriately.
-
     """
 
     # singleton helper
@@ -89,9 +83,7 @@ class ImageLoader(object):
         """
         Providing the subject name and the image of interest, the image is loaded either from the memory cache, the
         temporary folder or it is downloaded from the internet. Images which are registered in the _database can be loaded.
-
         Note: if no points are available to the image, None is returned as points
-
         name (str): subject name
         image (str): image name
         dtype: which pixel type the image should be converted to
@@ -184,7 +176,6 @@ class ImageLoader(object):
     def clear():
         """
         Delete database of images and the temp directory
-
         Finally, a new temp directory is created
         """
         # clear dict
@@ -229,7 +220,7 @@ class ImageLoader(object):
                 }
                 )
             data[prefix + str(i)]["copyright"] = """
-    Data has been provided by the Léon Bérard Cancer Center & CREATIS lab, Lyon, France.
+    Data has been provided by the LÃ©on BÃ©rard Cancer Center & CREATIS lab, Lyon, France.
     The data is described in:
     
     J. Vandemeulebroucke, S. Rit, J. Kybic, P. Clarysse, and D. Sarrut. 
@@ -241,4 +232,3 @@ class ImageLoader(object):
     """
 
         return data
-

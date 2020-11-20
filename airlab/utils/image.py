@@ -204,7 +204,7 @@ class Displacement(Image):
         return itk_displacement
 
     def magnitude(self):
-       return Image(th.sqrt(th.sum(self.image.pow(2),  -1)).squeeze(), self.size, self.spacing, self.origin)
+        return Image(th.sqrt(th.sum(self.image.pow(2),  -1)).squeeze(), self.size, self.spacing, self.origin)
 
     def numpy(self):
         return self.image.cpu().numpy()

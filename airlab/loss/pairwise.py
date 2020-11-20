@@ -276,7 +276,7 @@ class MI(_PairwiseImageLoss):
     r""" Implementation of the Mutual Information image loss.
 
          .. math::
-            \mathcal{S}_{\text{MI}} := H(F, M) - H(F|M) - H(M|F)
+            \mathcal{S}_{\text{MI}} := H(F) + H(M) - H(F, M)
 
         Args:
             fixed_image (Image): Fixed image for the registration
@@ -362,7 +362,9 @@ class MI(_PairwiseImageLoss):
         fixed_image_valid = th.masked_select(fixed_image_valid, mask)
         moving_image_valid = th.masked_select(moving_image_valid, mask)
 
-        number_of_pixel = moving_image_valid.shape[0]
+        # number_of_pixel = moving_image_valid.shape[0]
+        # computation of number of pixel is wrong
+        number_of_pixel = np.prod(moving_image_valid.shape)
 
         sample = th.zeros(number_of_pixel, device=self._fixed_image.device,
                           dtype=self._fixed_image.dtype).uniform_() < self._spatial_samples
@@ -383,7 +385,8 @@ class MI(_PairwiseImageLoss):
 
         ent_joint = -(p_joint * th.log2(p_joint + 1e-10)).sum()
 
-        return -(ent_fixed_image + ent_moving_image - ent_joint)
+        # return -(ent_fixed_image + ent_moving_image - ent_joint)
+        return ent_fixed_image + ent_moving_image - ent_joint
 
 class NGF(_PairwiseImageLoss):
     r""" Implementation of the Normalized Gradient Fields image loss.

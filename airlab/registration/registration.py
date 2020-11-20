@@ -99,8 +99,8 @@ class PairwiseRegistration(_PairwiseRegistration):
         lossList = []
         loss_names = []
         for image_loss in self._image_loss:
-             lossList.append(image_loss(displacement))
-             loss_names.append(image_loss.name)
+            lossList.append(image_loss(displacement))
+            loss_names.append(image_loss.name)
 
         # compute the regularisation loss on the displacement
         for reg_disp in self._regulariser_displacement:
